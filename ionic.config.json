@@ -1,0 +1,7 @@
+{
+  "name": "bus-control-app",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
