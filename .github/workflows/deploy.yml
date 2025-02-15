@@ -40,4 +40,4 @@ jobs:
         PASSWORD: ${{ secrets.VPS_PASSWORD }}
       run: |
         echo "Deploying to VPS..."
-        sshpass -p "$PASSWORD" scp -o StrictHostKeyChecking=no -r www/* $USERNAME@$HOST:/var/www/bc.ajustadoati.com
+        sshpass -p "$PASSWORD" scp -o StrictHostKeyChecking=no -r www/browser/* $USERNAME@$HOST:/var/www/bc.ajustadoati.com
