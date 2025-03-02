@@ -1,9 +1,9 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/home"></ion-back-button> <!-- Botón de regresar -->
+    <ion-title>Agregar Vehículo</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cerrar()">Cerrar</ion-button>
     </ion-buttons>
-    <ion-title>Vehículos</ion-title>
   </ion-toolbar>
 </ion-header>
 <ion-content [fullscreen]="true">
@@ -20,24 +20,33 @@
     <ion-card-content>
       <form id="vehicle-form" (ngSubmit)="agregarVehiculo()">
         <ion-item>
+          <ion-label>Tipo de Vehículo</ion-label>
+          <ion-select [(ngModel)]="nuevoVehiculo.vehicleType" name="tipo" required>
+            <ion-select-option *ngFor="let type of vehicleTypes" [value]="type.id">
+              {{ type.type }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-item>
+          <ion-label position="floating">Unidad</ion-label>
+          <ion-input type="text" [(ngModel)]="nuevoVehiculo.numberId" name="numberId" required></ion-input>
+        </ion-item>
+        <ion-item>
           <ion-label position="floating">Marca</ion-label>
           <ion-input type="text" [(ngModel)]="nuevoVehiculo.marca" name="marca" required></ion-input>
         </ion-item>
         <ion-item>
           <ion-label position="floating">Modelo</ion-label>
-          <ion-input type="text" [(ngModel)]="nuevoVehiculo.modelo" name="modelo" required></ion-input>
+          <ion-input type="text" [(ngModel)]="nuevoVehiculo.model" name="model" required></ion-input>
         </ion-item>
         <ion-item>
-          <ion-label position="floating">Año</ion-label>
-          <ion-input type="number" [(ngModel)]="nuevoVehiculo.anio" name="anio" required></ion-input>
+          <ion-label position="floating">Placa</ion-label>
+          <ion-input type="text" [(ngModel)]="nuevoVehiculo.serial" name="serial" required></ion-input>
         </ion-item>
+       
         <ion-item>
-          <ion-label>Tipo de Vehículo</ion-label>
-          <ion-select [(ngModel)]="nuevoVehiculo.tipo" name="tipo" required>
-            <ion-select-option value="bus">Bus</ion-select-option>
-            <ion-select-option value="taxi">Taxi</ion-select-option>
-            <ion-select-option value="moto">Moto Delivery</ion-select-option>
-          </ion-select>
+          <ion-label position="floating">Empresa</ion-label>
+          <ion-input type="text" [(ngModel)]="nuevoVehiculo.company" name="company" required></ion-input>
         </ion-item>
         <ion-button expand="full" type="submit">Registrar</ion-button>
       </form>
@@ -48,9 +57,9 @@
   <ion-list>
     <ion-item *ngFor="let vehiculo of vehiculos">
       <ion-label>
-        <h2>{{ vehiculo.marca }} {{ vehiculo.modelo }}</h2>
-        <p>Año: {{ vehiculo.anio }}</p>
-        <p>Tipo: {{ vehiculo.tipo }}</p>
+        <h2>{{ vehiculo.marca }} {{ vehiculo.model }}</h2>
+        <p>Año: {{ vehiculo.serial }}</p>
+        <p>Unidad: {{ vehiculo.numberId }}</p>
       </ion-label>
     </ion-item>
   </ion-list>

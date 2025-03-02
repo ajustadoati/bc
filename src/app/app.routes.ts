@@ -1,6 +1,11 @@
 import { Routes } from '@angular/router';
+import { AuthGuard } from './guards/auth.guard';
+import { HomePage } from './home/home.page';
+import { LoginPage } from './login/login.page';
 
 export const routes: Routes = [
+  { path: 'home', component: HomePage, canActivate: [AuthGuard] },
+  { path: 'login', component: LoginPage },
   {
     path: 'home',
     loadComponent: () => import('./home/home.page').then((m) => m.HomePage),
@@ -29,5 +34,9 @@ export const routes: Routes = [
   {
     path: 'crear',
     loadComponent: () => import('./vehiculos/crear/crear/crear.page').then( m => m.CrearPage)
-  }
+  },
+  {
+    path: 'login',
+    loadComponent: () => import('./login/login.page').then( m => m.LoginPage)
+  },{ path: '', redirectTo: 'login', pathMatch: 'full' }
 ];
