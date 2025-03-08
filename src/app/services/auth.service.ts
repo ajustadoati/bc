@@ -4,6 +4,8 @@ import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import jwt_decode, { jwtDecode } from 'jwt-decode';
 import { environment } from 'src/environments/environment';
+import { User } from '../interfaces/user';
+import { UserService } from './user.service';
 
 @Injectable({
   providedIn: 'root'
@@ -12,19 +14,24 @@ export class AuthService {
 
   private apiUrl = environment.baseUrl+'/api/auth'; 
   private authState = new BehaviorSubject<boolean>(false); 
+  private userSubject = new BehaviorSubject<User | null>(null);
+  user$ = this.userSubject.asObservable();
 
-  constructor(private http: HttpClient, private router: Router) {
+  constructor(private http: HttpClient, private router: Router, private userService: UserService) {
     this.checkToken(); // Verificar si el usuario ya tiene sesión activa
   }
 
   login(credentials: { username: string; password: string }): Observable<any> {
-    console.log(credentials);
+   
     return this.http.post<any>(`${this.apiUrl}/login`, credentials).pipe(
       tap(response => {
         if (response.token) {
+          
           localStorage.setItem('token', response.token);
           const user = this.decodeToken(response.token);
-          localStorage.setItem('userId', user.userId); // Guarda el ID del usuario
+          console.log("value token",user.sub);
+          localStorage.setItem('userId', user.sub); // Guarda el ID del usuario
+          this.loadUser(user.sub).subscribe(); // Carga el usuario en el BehaviorSubject
           this.authState.next(true);
         }
       })
@@ -82,6 +89,18 @@ export class AuthService {
         this.logout(); // Si el token es inválido, cerrar sesión
       }
     }
+  }
+
+  loadUser(userId: string): Observable<User> {
+    console.log("loading user",userId);
+    return this.userService.getUser(userId).pipe(
+      tap(user => this.userSubject.next(user)) // Guarda el usuario en el BehaviorSubject
+    );
+  }
+
+  getUser(): User | null {
+    console.log("getting user",this.userSubject.value);
+    return this.userSubject.value;
   }
 
   getAuthState(): Observable<boolean> {

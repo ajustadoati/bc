@@ -14,7 +14,7 @@ import { VehicleTypeService } from 'src/app/services/vehicle-type.service';
   styleUrls: ['./crear.page.scss'],
   standalone: true,
   imports: [IonButtons, IonCardTitle, IonCardHeader, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonCard, IonCardTitle, IonCardContent, 
-    IonItem, IonLabel, IonInput, IonButton, IonSelect, IonSelectOption, IonList, IonButtons,  IonBackButton ],
+    IonItem, IonLabel, IonInput, IonButton, IonSelect, IonSelectOption, IonButtons],
 })
 export class CrearPage implements OnInit {
 

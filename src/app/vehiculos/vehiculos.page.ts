@@ -5,23 +5,27 @@ import { IonBackButton, IonButton, IonButtons, IonCard, IonCardContent, IonCardH
 import { CrearPage } from './crear/crear/crear.page';
 import { VehiculoService } from '../services/vehiculo.service';
 import { AuthService } from '../services/auth.service';
+import { AlertController } from '@ionic/angular';
 
 @Component({
   selector: 'app-vehiculos',
   templateUrl: './vehiculos.page.html',
   styleUrls: ['./vehiculos.page.scss'],
   standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonButtons, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonCard, IonCardTitle, IonCardContent, 
+  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonButtons, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, 
     IonItem, IonLabel, IonIcon, IonButton, IonList, IonButtons,  IonBackButton ]
 })
 export class VehiculosPage implements OnInit {
 
+
   vehiculos = [
-    { numberId: '001', marca: 'Toyota', model: 'Corolla', serial: 'ABC123', company: 'Empresa X' },
-    { numberId: '002', marca: 'Honda', model: 'Civic', serial: 'DEF456', company: 'Empresa Y' }
+    { id: 1, numberId: '001', marca: 'Toyota', model: 'Corolla', serial: 'ABC123', company: 'Empresa X' },
+    { id: 2, numberId: '002', marca: 'Honda', model: 'Civic', serial: 'DEF456', company: 'Empresa Y' }
   ];
 
-  constructor(private modalCtrl: ModalController, private vehiculosService: VehiculoService, private authService: AuthService) {}
+  constructor(private modalCtrl: ModalController, private vehiculosService: VehiculoService, private authService: AuthService,
+    private alertController: AlertController
+  ) {}
   ngOnInit(): void {
     var userId = this.authService.getUserId();
     this.vehiculosService.getVehiculos(userId).subscribe({
@@ -47,6 +51,29 @@ export class VehiculosPage implements OnInit {
       component: CrearPage
     });
     await modal.present();
+  }
+
+  async eliminarVehiculo(vehiculo: any) {
+    const alert = await this.alertController.create({
+      header: 'Eliminar Vehículo',
+      message: `¿Estás seguro de que deseas eliminar vehículo?`,
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+        },
+        {
+          text: 'Eliminar',
+          handler: () => {
+            this.vehiculosService.eliminarVehiculo(vehiculo.id).subscribe(() => {
+              this.vehiculos= this.vehiculos.filter(o => o.id !== vehiculo.id);
+            });
+          },
+        },
+      ],
+    });
+
+    await alert.present();
   }
 
 }

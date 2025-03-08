@@ -3,7 +3,7 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/home"></ion-back-button>
     </ion-buttons>
-    <ion-title>Vehículos</ion-title>
+    <ion-title>Operadores</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="abrirModalAgregar()">
         <ion-icon name="add-circle"></ion-icon> Agregar
@@ -15,19 +15,19 @@
 <ion-content [fullscreen]="true">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">Vehículos</ion-title>
+      <ion-title size="large">Operadores</ion-title>
     </ion-toolbar>
   </ion-header>
 
   <!-- Listado de vehículos -->
   <ion-list>
-    <ion-item *ngFor="let vehiculo of vehiculos">
+    <ion-item *ngFor="let operador of operadoresFiltrados">
       <ion-label>
-        <h2>Unidad: {{ vehiculo.numberId }}</h2>
-        <p>{{ vehiculo.marca }} {{ vehiculo.model }}</p>
-        <p>Placa: {{ vehiculo.serial }}</p>
+        <h2>Operador: {{ operador.firstName }} {{ operador.lastName }}</h2>
+        <p>Cédula: {{ operador.numberId }}</p>
+        <p>Tipo: {{ operador.type }}</p>
       </ion-label>
-      <ion-buttons color="danger" (click)="eliminarVehiculo(vehiculo)">
+      <ion-buttons color="danger" (click)="eliminarOperador(operador)">
         <ion-icon name="trash"></ion-icon> Eliminar
       </ion-buttons>
     </ion-item>

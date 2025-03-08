@@ -15,8 +15,8 @@ import { CommonModule } from '@angular/common';
 export class LoginPage implements OnInit {
 
   credentials = {
-    username: '',
-    password: ''
+    username: '12777981',
+    password: 'mySecurePassword123'
   };
   errorMessage = '';
 
@@ -26,7 +26,7 @@ export class LoginPage implements OnInit {
   }
 
   login() {
-    console.log(this.credentials);
+    
     this.authService.login(this.credentials).subscribe({
       next: () => {
         this.router.navigate(['/home']); // Redirigir después del login
