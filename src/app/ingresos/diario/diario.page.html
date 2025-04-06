@@ -1,0 +1,78 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Diario</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cerrar()">Cerrar</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">diario</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  <ion-card>
+    <ion-card-content>
+      <form [formGroup]="dailyPaymentForm" (ngSubmit)="submitForm()">
+        <ion-item>
+          <ion-label>Chofer: </ion-label>
+          <ion-select formControlName="userDriverId">
+            <ion-select-option *ngFor="let user of users" [value]="user.id">{{ user.firstName}}</ion-select-option>
+          </ion-select>
+        </ion-item>
+  
+        <ion-item>
+          <ion-label>Colector: </ion-label>
+          <ion-select formControlName="userColectorId">
+            <ion-select-option *ngFor="let user of users" [value]="user.id">{{ user.firstName }}</ion-select-option>
+          </ion-select>
+        </ion-item>
+  
+        <ion-item>
+          <ion-label>Unidad: </ion-label>
+          <ion-select formControlName="vehicleId">
+            <ion-select-option *ngFor="let vehicle of vehicles" [value]="vehicle.id">{{ vehicle.numberId }}</ion-select-option>
+          </ion-select>
+        </ion-item>
+  
+        <ion-item>
+          <ion-label>Fecha: </ion-label>
+          <ion-input type="date" formControlName="dailyDate"></ion-input>
+        </ion-item>
+  
+        <ion-item>
+          <ion-label>Km Inicio: </ion-label>
+          <ion-input type="number" formControlName="kilometerStart"></ion-input>
+        </ion-item>
+  
+        <ion-item>
+          <ion-label>Km Fin: </ion-label>
+          <ion-input type="number" formControlName="kilometerEnd"></ion-input>
+        </ion-item>
+  
+        <ion-list>
+          <ion-list-header>Tipos de Pago</ion-list-header>
+          <div formArrayName="dailyPaymentTypes">
+            <div *ngFor="let payment of dailyPaymentTypes.controls; let i = index" [formGroupName]="i">
+              <ion-item>
+                <ion-label>Tipo de Pago: </ion-label>
+                <ion-select formControlName="paymentTypeId">
+                  <ion-select-option *ngFor="let pt of paymentTypes" [value]="pt.paymentTypeId">{{ pt.paymentTypeName }}</ion-select-option>
+                </ion-select>
+              </ion-item>
+              <ion-item>
+                <ion-label>Monto: </ion-label>
+                <ion-input type="number" formControlName="amount"></ion-input>
+              </ion-item>
+            </div>
+          </div>
+          <ion-button (click)="addPaymentType()">Agregar Tipo de Pago</ion-button>
+        </ion-list>
+  
+        <ion-button expand="full" type="submit">Enviar</ion-button>
+      </form>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

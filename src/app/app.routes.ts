@@ -44,5 +44,13 @@ export const routes: Routes = [
     path: 'crear',
     loadComponent: () => import('./vehiculos/crear/crear/crear.page').then(m => m.CrearPage),
     canActivate: [AuthGuard]
+  },
+  {
+    path: 'diario',
+    loadComponent: () => import('./ingresos/diario/diario.page').then( m => m.DiarioPage)
+  },
+  {
+    path: 'detalle',
+    loadComponent: () => import('./ingresos/detalle/detalle/detalle.page').then( m => m.DetallePage)
   }
 ];

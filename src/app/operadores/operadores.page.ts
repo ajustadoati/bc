@@ -20,13 +20,14 @@ export class OperadoresPage implements OnInit {
     { id: 2,firstName: 'Pablo', lastName: 'Perez', numberId: '002', mobileNumber: 'ABC123', type: 'Empresa X', email: "email" }
   ];
 
+  user: any;
 
   constructor(private modalCtrl: ModalController, private operadorService: OperadorService, private authService: AuthService,
     private alertController: AlertController
   ) {}
   ngOnInit(): void {
-    var userId = this.authService.getUserId();
-    this.operadorService.getOperadores(userId).subscribe({
+     this.user = this.authService.getUser();
+    this.operadorService.getOperadores(this.user.id).subscribe({
       next: (response) => {
         this.operadores = response;
       },

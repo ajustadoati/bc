@@ -13,7 +13,7 @@ export class OperadorService {
   constructor(private http: HttpClient) { }
 
   getOperadores(userId: string): Observable<any[]> {
-   
+    console.log("Get operadores", userId);
     return this.http.get<any[]>(this.apiUrl +'/'+ userId + '/company')
       .pipe(
         map((data: any) => {

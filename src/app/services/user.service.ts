@@ -22,4 +22,14 @@ export class UserService {
         })
       );
   }
+
+  getUsers(userId: number): Observable<any[]> {
+    
+      return this.http.get<any[]>(this.apiUrl +'/'+ userId + '/company')
+      .pipe(
+        map((data: any) => {
+          return data._embedded ? data._embedded.collection : [];
+        })
+      );
+  }
 }

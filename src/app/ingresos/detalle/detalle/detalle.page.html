@@ -1,0 +1,47 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Detalles del Pago</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cerrarModal()">Cerrar</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Información del Pago</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="6">
+            <p><strong>Chofer:</strong> {{chofer?.firstName}}</p>
+          </ion-col>
+          <ion-col size="6">
+            <p><strong>Colector:</strong> {{ colector?.firstName}}</p>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="6">
+            <p><strong>Unidad:</strong> {{ vehiculo.numberId }}</p>
+          </ion-col>
+          <ion-col size="6">
+            <p><strong>Kilómetros:</strong> {{ payment.kilometerStart }} - {{ payment.kilometerEnd }}</p>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="12">
+            <p><strong>Montos:</strong></p>
+            <ion-list>
+              <ion-item *ngFor="let type of paymentTypes">
+                <ion-label>{{ type.paymentName }}</ion-label>
+                <ion-note slot="end">{{ type.amount | currency }}</ion-note>
+              </ion-item>
+            </ion-list>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

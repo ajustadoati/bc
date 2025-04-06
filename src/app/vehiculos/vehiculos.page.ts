@@ -23,12 +23,20 @@ export class VehiculosPage implements OnInit {
     { id: 2, numberId: '002', marca: 'Honda', model: 'Civic', serial: 'DEF456', company: 'Empresa Y' }
   ];
 
+  user: any;
+  userId: any;
   constructor(private modalCtrl: ModalController, private vehiculosService: VehiculoService, private authService: AuthService,
     private alertController: AlertController
   ) {}
   ngOnInit(): void {
-    var userId = this.authService.getUserId();
-    this.vehiculosService.getVehiculos(userId).subscribe({
+   
+    if (this.userId == null) {
+      this.user = this.authService.getUser();
+      this.userId = this.user.id;
+    }
+
+
+    this.vehiculosService.getVehiculos(this.userId).subscribe({
       next: (response) => {
         this.vehiculos = response;
       },
