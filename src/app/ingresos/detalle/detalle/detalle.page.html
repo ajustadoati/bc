@@ -36,7 +36,7 @@
             <ion-list>
               <ion-item *ngFor="let type of paymentTypes">
                 <ion-label>{{ type.paymentName }}</ion-label>
-                <ion-note slot="end">{{ type.amount | currency }}</ion-note>
+                <ion-note slot="end">{{ type.amount | number:'1.2-2' }}</ion-note>
               </ion-item>
             </ion-list>
           </ion-col>

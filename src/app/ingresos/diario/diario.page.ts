@@ -1,22 +1,23 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule, formatDate } from '@angular/common';
-import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { IonButton, IonCard, IonCardContent, IonContent, IonHeader, IonItem, IonLabel, IonList, IonListHeader, IonSelectOption, IonTitle, IonToolbar, IonButtons, IonModal, IonDatetime, IonDatetimeButton, IonSelect, IonInput } from '@ionic/angular/standalone';
+import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { IonButton, IonGrid, IonRow, IonCard, IonCardContent, IonContent, IonHeader, IonItem, IonLabel, IonList, IonListHeader, IonSelectOption, IonTitle, IonToolbar, IonButtons, IonModal, IonDatetime, IonDatetimeButton, IonSelect, IonInput, IonCol } from '@ionic/angular/standalone';
 import { PaymentTypeService } from 'src/app/services/payment-type.service';
 import { UserService } from 'src/app/services/user.service';
 import { VehiculoService } from 'src/app/services/vehiculo.service';
 import { ModalController } from '@ionic/angular';
 import { AuthService } from 'src/app/services/auth.service';
 import { DailyPaymentService } from 'src/app/services/daily-payment.service';
+import { AlertController } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-diario',
   templateUrl: './diario.page.html',
   styleUrls: ['./diario.page.scss'],
   standalone: true,
-  imports: [IonButtons, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonItem, IonLabel, 
+  imports: [IonCol, IonButtons, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonItem, IonLabel, 
     IonCard, IonCardContent, IonSelectOption, IonList, IonListHeader, IonButton, ReactiveFormsModule,
-    IonButton, IonButtons,IonSelect, IonInput
+    IonButton, IonButtons,IonSelect, IonInput, IonGrid, IonRow
   ] 
 })
 export class DiarioPage implements OnInit {
@@ -29,6 +30,8 @@ export class DiarioPage implements OnInit {
   @Input() userId: any;
   user: any;
   date!: Date;
+  conductors: any[] = [];
+  collectors:any[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -37,27 +40,27 @@ export class DiarioPage implements OnInit {
     private paymentTypeService: PaymentTypeService,
     private modalCtrl: ModalController,
     private userService: UserService,
-    private dailyPaymentService: DailyPaymentService
+    private dailyPaymentService: DailyPaymentService,
+    private alertController: AlertController
   ) {
     this.dailyPaymentForm = this.fb.group({
       userId: [''],
-      userColectorId: [''],
-      userDriverId: [''],
-      vehicleId: [''],
+      userColectorId: ['', Validators.required],
+      userDriverId: ['', Validators.required],
+      vehicleId: ['', Validators.required],
       dailyDate: [formatDate(new Date(), 'yyyy-MM-dd', 'en-US')],
       kilometerStart: [''],
       kilometerEnd: [''],
       dailyPaymentTypes: this.fb.array([
         this.fb.group({
-          paymentTypeId: [''],
-          amount: ['']
+          paymentTypeId: ['', Validators.required],
+          amount: [Validators.required, Validators.min(0.01)]
         })
       ])
     });
   }
 
   ngOnInit() {
-    //this.userService.getUsers().subscribe(data => this.users = data);
     if (this.userId == null) {
       this.user = this.authService.getUser();
       this.userId = this.user.id;
@@ -88,6 +91,8 @@ export class DiarioPage implements OnInit {
       next: (response) => {
         console.log(response);
         this.users = response;
+        this.conductors = this.users.filter(user => user.type === 'CONDUCTOR');
+        this.collectors = this.users.filter(user => user.type === 'COLECTOR');
       },
       error: (err) => {
         console.error(err);
@@ -95,6 +100,7 @@ export class DiarioPage implements OnInit {
     });
 
   }
+
 
   get dailyPaymentTypes(): FormArray {
     return this.dailyPaymentForm.get('dailyPaymentTypes') as FormArray;
@@ -107,26 +113,39 @@ export class DiarioPage implements OnInit {
     }));
   }
 
-  submitForm() {
-    console.log('values for saving:', this.dailyPaymentForm.value);
+  async submitForm() {
+    if (this.dailyPaymentForm.invalid) {
+      await this.showAlert('Formulario incompleto', 'Por favor, completa todos los campos obligatorios.');
+      return;
+    }
+  
     this.dailyPaymentForm.value.userId = this.userId;
-
+  
     this.dailyPaymentService.agregarPago(this.dailyPaymentForm.value).subscribe({
-      next: (response) => {
+      next: async (response) => {
         console.log(response);
-        alert('Pago diario guardado correctamente');
+        await this.showAlert('Éxito', 'Pago diario guardado correctamente.');
         this.modalCtrl.dismiss();
       },
-      error: (err) => {
+      error: async (err) => {
         console.error(err);
-        alert('Error al guardar el pago diario');
+        await this.showAlert('Error', 'Error al guardar el pago diario.');
       }
     });
   }
 
-  cerrar() {
-    this.modalCtrl.dismiss();
+  async showAlert(header: string, message: string) {
+    const alert = await this.alertController.create({
+      header,
+      message,
+      buttons: ['OK']
+    });
+  
+    await alert.present();
   }
 
+  cerrar() {
+    this.modalCtrl.dismiss(null, 'refresh');
+  }
 
 }

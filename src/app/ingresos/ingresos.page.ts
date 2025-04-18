@@ -7,6 +7,7 @@ import { DetallePage } from './detalle/detalle/detalle.page';
 import { AlertController } from '@ionic/angular';
 import { DiarioPage } from './diario/diario.page';
 import { AuthService } from '../services/auth.service';
+import { VehiculoService } from '../services/vehiculo.service';
 
 @Component({
   selector: 'app-ingresos',
@@ -23,6 +24,7 @@ export class IngresosPage implements OnInit {
   dailyPayments: any;
   pagos: any;
   user: any;
+  vehiculos: any[]=[];
 
   eliminarOperador(_t29: any) {
   throw new Error('Method not implemented.');
@@ -30,19 +32,11 @@ export class IngresosPage implements OnInit {
   
 
   constructor(private dailyPaymentService: DailyPaymentService, private modalController: ModalController,
-    private alertController: AlertController, private authService: AuthService) { }
+    private alertController: AlertController, private authService: AuthService, private vehiculoService: VehiculoService) { }
 
   ngOnInit() {
-    this.user = this.authService.getUser();
-
-    this.dailyPaymentService.obtenerPagosDiarios(this.user.id).subscribe({
-      next: (response) => {
-        this.dailyPayments = response;
-      },
-      error: (err) => {
-        console.error(err);
-      }
-    });
+    this.cargarPagos();
+    this.cargarVehiculos();
   }
 
   getTotal(dailyPaymentTypes: any[]): number {
@@ -59,15 +53,53 @@ export class IngresosPage implements OnInit {
     return await modal.present();
   }
 
+  cargarPagos() {
+    this.user = this.authService.getUser();
+
+    this.dailyPaymentService.obtenerPagosDiarios(this.user.id).subscribe({
+      next: (response) => {
+        this.dailyPayments = response;
+      },
+      error: (err) => {
+        console.error(err);
+      }
+    });
+  }
+
+  cargarVehiculos() {
+    this.user = this.authService.getUser();
+
+    this.vehiculoService.getVehiculos(this.user.id).subscribe({
+      next: (response) => {
+        this.vehiculos = response;
+      },
+      error: (err) => {
+        console.error(err);
+      }
+    });
+  }
+
+  getVehicleNumberId(vehicleId: any): string {
+    const vehiculo = this.vehiculos.find(v => v.id === vehicleId);
+    return vehiculo ? vehiculo.numberId : 'Desconocido';
+  }
+
   async abrirModalAgregar(userId: any) {
     const modal = await this.modalController.create({
       component: DiarioPage,
       componentProps: {
-        userId: userId
-      },
-  
+        userId: this.user?.id
+      }
     });
-    return await modal.present();
+  
+    await modal.present();
+  
+    const { role } = await modal.onWillDismiss();
+    
+    // Luego de cerrar el modal, actualizamos la lista
+    if (role !== 'refresh') {
+      this.cargarPagos();  // método que vuelve a cargar los datos
+    }
   }
 
 }

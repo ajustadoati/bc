@@ -1,13 +1,24 @@
-import { Component } from '@angular/core';
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonButton } from '@ionic/angular/standalone';
-import { RouterModule } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonButton, IonButtons } from '@ionic/angular/standalone';
+import { Router, RouterModule } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
-  imports: [IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonButton, RouterModule],
+  imports: [IonButtons, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonButton, RouterModule],
 })
 export class HomePage {
-  constructor() {}
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) {}
+
+
+  logout() {
+    this.authService.logout(); // aquí puedes limpiar storage o token si es necesario
+    this.router.navigate(['/login']);
+  }
+
 }

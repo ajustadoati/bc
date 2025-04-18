@@ -17,7 +17,8 @@
     <ion-item *ngFor="let payment of dailyPayments">
       <ion-label>
         <h2>{{ payment.dailyDate | date:'dd-MM-yy' }}</h2>
-        <p>{{ getTotal(payment.dailyPaymentTypes) | currency }}</p>
+        <p>{{ getTotal(payment.dailyPaymentTypes) | number:'1.2-2' }}</p>
+        <p>Unidad: {{ getVehicleNumberId(payment.vehicleId) }}</p>
       </ion-label>
       <ion-button fill="outline" slot="end" (click)="abrirModalDetalle(payment)">Ver Detalle</ion-button>
     </ion-item>

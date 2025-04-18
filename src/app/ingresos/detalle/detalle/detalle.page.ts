@@ -6,6 +6,7 @@ import { VehiculoService } from 'src/app/services/vehiculo.service';
 import { OperadorService } from 'src/app/services/operador.service';
 import { first } from 'rxjs';
 import { PaymentTypeService } from 'src/app/services/payment-type.service';
+import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-detalle',
@@ -19,22 +20,24 @@ import { PaymentTypeService } from 'src/app/services/payment-type.service';
 export class DetallePage implements OnInit {
 
   @Input() payment: any;
+  user: any;
 
   vehiculo: any={placa: "Default", marca: "Default", modelo: "Default", numberId:0};
   chofer: any={firstName: "Default", lastName: "Default"};
   colector: any={firstName: "Default", lastName: "Default"};
   paymentTypes: any[] = [];
   constructor(private modalController: ModalController, private vehiculoService: VehiculoService, 
-    private operadorService: OperadorService, private paymentTypeService: PaymentTypeService) {}
+    private operadorService: OperadorService, private paymentTypeService: PaymentTypeService,
+    private authService: AuthService) {}
 
   ngOnInit(): void {
-
-    var userId = localStorage.getItem("userId");
-      if (userId != null) {
-        this.vehiculoService.getVehiculos("1").subscribe((vehiculos) => {
+    this.user = this.authService.getUser();
+    
+      if (this.user != null) {
+        this.vehiculoService.getVehiculos(this.user.id).subscribe((vehiculos) => {
           this.vehiculo = vehiculos.find((vehiculo) => vehiculo.id == this.payment.vehicleId);
         });
-        this.operadorService.getOperadores(userId).subscribe((operadores) => {
+        this.operadorService.getOperadores(this.user.id).subscribe((operadores) => {
           console.log(this.payment);
           this.chofer = operadores.find((operador) => operador.id == this.payment.userDriverId);
           this.colector = operadores.find((operador) => operador.id == this.payment.userColectorId);
