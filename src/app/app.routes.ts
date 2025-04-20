@@ -31,6 +31,16 @@ export const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
+    path: 'vehiculos/:vehicleId/gastos',
+    loadComponent: () => import('./gastos/gastos-list/gastos-list/gastos-list.page').then(m => m.GastosListPage),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'vehiculos/:vehicleId/gastos/nuevo',
+    loadComponent: () => import('./gastos/gastos-crear/crear/crear.page').then(m => m.CrearPage),
+    canActivate: [AuthGuard]
+  },
+  {
     path: 'operadores',
     loadComponent: () => import('./operadores/operadores.page').then(m => m.OperadoresPage),
     canActivate: [AuthGuard]
@@ -52,5 +62,13 @@ export const routes: Routes = [
   {
     path: 'detalle',
     loadComponent: () => import('./ingresos/detalle/detalle/detalle.page').then( m => m.DetallePage)
+  },
+  {
+    path: 'gastos-list',
+    loadComponent: () => import('./gastos/gastos-list/gastos-list/gastos-list.page').then( m => m.GastosListPage)
+  },
+  {
+    path: 'crear',
+    loadComponent: () => import('./gastos/gastos-crear/crear/crear.page').then( m => m.CrearPage)
   }
 ];

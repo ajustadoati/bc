@@ -1,0 +1,62 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Agregar Gasto</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form (ngSubmit)="submitForm()" [formGroup]="formGasto">
+    <ion-item>
+      <ion-label position="floating">Categoría</ion-label>
+      <ion-select (ionChange)="onCategoryChange($event.detail.value)">
+        <ion-select-option *ngFor="let type of categories" [value]="type.id">
+          {{ type.name }}
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
+    <ion-item *ngIf="expenseTypes.length > 0">
+      <ion-label position="floating">Tipo</ion-label>
+      <ion-select formControlName="expenseTypeId">
+        <ion-select-option *ngFor="let sub of expenseTypes" [value]="sub.id">
+          {{ sub.name }}
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Taller</ion-label>
+      <ion-select formControlName="workshopId">
+        <ion-select-option *ngFor="let ws of workshops" [value]="ws.id">
+          {{ ws.name }}
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Fecha</ion-label>
+      <ion-input type="date" formControlName="expenseDate"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Descripción</ion-label>
+      <ion-input formControlName="description"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Kilómetros</ion-label>
+      <ion-input type="number" formControlName="kilometer"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Monto</ion-label>
+      <ion-input type="number" formControlName="amount"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Mano de obra</ion-label>
+      <ion-input type="number" formControlName="labour"></ion-input>
+    </ion-item>
+
+    <ion-button expand="block" type="submit" [disabled]="formGasto.invalid">Guardar</ion-button>
+  </form>
+</ion-content>

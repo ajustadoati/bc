@@ -1,0 +1,22 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/gastos"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Gastos del Vehículo</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="goToAddExpense()">Agregar Gasto</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <ion-item *ngFor="let expense of expenses" (click)="goToDetail(expense.id)">
+      <ion-label>
+        <h3>{{ expense.description }}</h3>
+        <p>Fecha: {{ expense.expenseDate | date:'dd-MM-yy' }} - {{ expense.amount | number:'1.2-2' }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>
