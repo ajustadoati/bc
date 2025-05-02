@@ -1,0 +1,23 @@
+<ion-content class="ion-padding">
+  <form (ngSubmit)="submitForm()" [formGroup]="formWorkshop">
+    <ion-item>
+      <ion-label position="floating">Nombre del Taller</ion-label>
+      <ion-input formControlName="name"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Teléfono</ion-label>
+      <ion-input formControlName="mobileNumber" type="tel"></ion-input>
+    </ion-item>
+
+    <div class="button-group">
+      <ion-button expand="full" type="submit" [disabled]="formWorkshop.invalid">
+        Agregar Taller
+      </ion-button>
+
+      <ion-button expand="full" type="submit" (click)="closeModal()">
+        Cancelar
+      </ion-button>
+    </div>
+  </form>
+</ion-content>

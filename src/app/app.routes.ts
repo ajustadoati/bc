@@ -70,5 +70,18 @@ export const routes: Routes = [
   {
     path: 'crear',
     loadComponent: () => import('./gastos/gastos-crear/crear/crear.page').then( m => m.CrearPage)
+  },
+  {
+    path: 'set-up',
+    loadComponent: () => import('./set-up/set-up.page').then( m => m.SetUpPage)
+  },  {
+    path: 'workshop-modal',
+    loadComponent: () => import('./set-up/workshop-modal/workshop-modal.page').then( m => m.WorkshopModalPage)
+  },
+  {
+    path: 'add-workshop-modal',
+    loadComponent: () => import('./set-up/add-workshop-modal/add-workshop-modal.page').then( m => m.AddWorkshopModalPage)
   }
+
+
 ];
