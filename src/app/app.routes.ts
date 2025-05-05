@@ -81,6 +81,14 @@ export const routes: Routes = [
   {
     path: 'add-workshop-modal',
     loadComponent: () => import('./set-up/add-workshop-modal/add-workshop-modal.page').then( m => m.AddWorkshopModalPage)
+  },
+  {
+    path: 'categoria-modal',
+    loadComponent: () => import('./set-up/categoria-modal/categoria-modal.page').then( m => m.CategoriaModalPage)
+  },
+  {
+    path: 'addcategoria-modal',
+    loadComponent: () => import('./set-up/addcategoria-modal/addcategoria-modal.page').then( m => m.AddcategoriaModalPage)
   }
 
 

@@ -1,0 +1,18 @@
+<ion-content class="ion-padding">
+  <form (ngSubmit)="submitForm()" [formGroup]="formAddCategorias">
+    <ion-item>
+      <ion-label position="floating">Nombre de la Categoria</ion-label>
+      <ion-input formControlName="name"></ion-input>
+    </ion-item>
+
+    <div class="button-group">
+      <ion-button expand="full" type="submit" [disabled]="formAddCategorias.invalid">
+        Agregar Categoria
+      </ion-button>
+
+      <ion-button expand="full" type="submit" (click)="closeModal()">
+        Cancelar
+      </ion-button>
+    </div>
+  </form>
+</ion-content>

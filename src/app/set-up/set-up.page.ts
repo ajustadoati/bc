@@ -3,8 +3,9 @@ import { IonModal, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonBu
 import { CommonModule } from '@angular/common';
 import { ModalController } from '@ionic/angular';
 import { TallerService } from 'src/app/services/taller.service';
+import { CategoriaService} from 'src/app/services/categoria.service'
 import { WorkshopModalPage } from './workshop-modal/workshop-modal.page';
-
+import { CategoriaModalPage } from './categoria-modal/categoria-modal.page'
 
 @Component({
   selector: 'app-set-up',
@@ -15,12 +16,13 @@ import { WorkshopModalPage } from './workshop-modal/workshop-modal.page';
 })
 export class SetUpPage implements OnInit{
   workshops: any[] = [];
+  categorias: any[] = [];
 
-
-  constructor(private tallerService: TallerService, private modalCtrl: ModalController) {}
+  constructor(private tallerService: TallerService,private categoriaService: CategoriaService, private modalCtrl: ModalController) {}
 
   ngOnInit(): void {
     this.loadWorkshops();
+    this.loadCategorias();
   }
   showModal = false;
 
@@ -40,6 +42,12 @@ export class SetUpPage implements OnInit{
     });
   }
 
+  loadCategorias(): void {
+    this.categoriaService.getAll().subscribe((data)=> {
+      this.categorias = data;
+    }); 
+  }
+
   async openWorkshopModal() {
     const modal = await this.modalCtrl.create({
       component: WorkshopModalPage,
@@ -49,7 +57,14 @@ export class SetUpPage implements OnInit{
     return await modal.present();
   }
 
+  async openCategoriashopModal(){
+    const modalCategoria = await this.modalCtrl.create({
+      component: CategoriaModalPage,
+      componentProps: {categorias: this.categorias}
+    })
 
+    return await modalCategoria.present()
+  }
 }
 
 

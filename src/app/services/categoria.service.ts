@@ -21,4 +21,9 @@ export class CategoriaService {
         })
       );
   }
+
+  createCategoria(data: { name: string }): Observable<any> {
+    console.log("Enviando nueva categoría:", data);
+    return this.http.post<any>(this.apiUrl, data);
+  }
 }
