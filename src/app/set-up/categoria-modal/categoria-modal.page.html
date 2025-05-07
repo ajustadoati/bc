@@ -4,15 +4,14 @@
     <ion-buttons slot="end">
       <ion-button (click)="closeModal()">Cerrar</ion-button>
       <ion-button (click)="addCategoriaModal()">Agregar</ion-button>
-
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
   <ion-list>
-    <ion-item *ngFor="let categoria of categorias">
-      {{ categoria.name }}
+    <ion-item button (click)="subCategoriaModal(categoria)" *ngFor="let categoria of categorias">
+      <ion-label>{{ categoria.name }}</ion-label>
     </ion-item>
   </ion-list>  
 </ion-content>
