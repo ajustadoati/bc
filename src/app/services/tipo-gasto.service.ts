@@ -21,4 +21,10 @@ export class TipoGastoService {
         })
       );
   }
+
+  addSubCategoria(data: { name: string;  expenseCategoryId: number}): Observable<any> {
+    console.log("Enviando nueva subcategoría:", data);
+    return this.http.post<any>(this.apiUrl, data);
+  }
+  
 }

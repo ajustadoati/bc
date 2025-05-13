@@ -93,6 +93,10 @@ export const routes: Routes = [
   {
     path: 'sub-categoria-modal',
     loadComponent: () => import('./set-up/sub-categoria-modal/sub-categoria-modal.page').then( m => m.SubCategoriaModalPage)
+  },
+  {
+    path: 'add-sub-categoria-modal',
+    loadComponent: () => import('./set-up/add-sub-categoria-modal/add-sub-categoria-modal.page').then( m => m.AddSubCategoriaModalPage)
   }
 
 

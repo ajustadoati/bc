@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ModalController } from '@ionic/angular';
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonButtons, IonList, IonItem,IonLabel } from '@ionic/angular/standalone';
 import { TipoGastoService } from 'src/app/services/tipo-gasto.service';
+import { AddSubCategoriaModalPage } from  '../add-sub-categoria-modal/add-sub-categoria-modal.page'
 
 @Component({
   selector: 'app-sub-categoria-modal',
@@ -32,5 +33,17 @@ export class SubCategoriaModalPage implements OnInit {
 
   closeModal() {
     this.modalCtrl.dismiss();
+  }
+
+  async AddSubCategoria() {
+    const modalAddSubCategoria = await this.modalCtrl.create({
+      component: AddSubCategoriaModalPage,
+      componentProps: {
+        categoriaId: this.categoryId,  
+        categoriaName: this.categoryName 
+      }
+    });
+
+    await modalAddSubCategoria.present();
   }
 }
