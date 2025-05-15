@@ -1,7 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ModalController } from '@ionic/angular';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonButtons, IonItem, IonButton,IonLabel,IonSelectOption,IonInput } from '@ionic/angular/standalone';
+import { IonContent, IonHeader, IonTitle, IonToolbar, IonButtons, IonItem, IonButton,IonLabel,IonInput,  } from '@ionic/angular/standalone';
 import { FormsModule,FormBuilder, FormGroup, Validators,ReactiveFormsModule } from '@angular/forms';
 import { CategoriaService } from 'src/app/services/categoria.service';
 import { TipoGastoService } from 'src/app/services/tipo-gasto.service';
@@ -11,7 +11,7 @@ import { TipoGastoService } from 'src/app/services/tipo-gasto.service';
   templateUrl: './add-sub-categoria-modal.page.html',
   styleUrls: ['./add-sub-categoria-modal.page.scss'],
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, IonButton, IonItem, IonButtons, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule,IonLabel,IonSelectOption,IonInput]
+  imports: [CommonModule, ReactiveFormsModule, IonButton, IonItem, IonButtons, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule,IonLabel,IonInput]
 })
 export class AddSubCategoriaModalPage implements OnInit {
   @Input() categoriaId!: number;
@@ -31,7 +31,7 @@ export class AddSubCategoriaModalPage implements OnInit {
   ngOnInit() {
     this.formAddSubCategoria = this.fb.group({
       name: ['', Validators.required],
-      expenseCategoryId: ['', Validators.required] 
+      expenseCategoryId: [this.categoriaId, Validators.required] 
     });
 
     this.loadCategorias();
