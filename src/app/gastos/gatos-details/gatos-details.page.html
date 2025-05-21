@@ -1,0 +1,36 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Detalles del Gasto </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cerrarModal()">Cerrar</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-card *ngIf="selectedExpense">
+    <ion-card-header>
+      <ion-card-title>Información del Gasto</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="6">
+            <p><strong>Fecha:</strong> {{ selectedExpense.expenseDate }}</p>
+          </ion-col>
+          <ion-col size="6">
+            <p><strong>Descripción:</strong> {{ selectedExpense.description }}</p>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="6">
+            <p><strong>Kilómetros:</strong> {{ selectedExpense.kilometer || 'No especificado' }}</p>
+          </ion-col>
+          <ion-col size="6">
+            <p><strong>Monto:</strong> {{ selectedExpense.amount || 'No especificado' }}</p>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+</ion-content>
