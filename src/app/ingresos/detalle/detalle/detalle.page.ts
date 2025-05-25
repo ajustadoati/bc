@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonButton, IonButtons, IonCard, IonCol, IonContent, IonGrid, IonHeader, IonRow, IonTitle, IonToolbar, ModalController, IonItem, IonCardHeader, IonCardContent, IonCardTitle, IonList, IonLabel, IonNote } from '@ionic/angular/standalone';
+import { IonButton, IonButtons, IonCard, IonCol, IonContent, IonGrid, IonHeader, IonRow, IonTitle, IonToolbar, ModalController, IonItem, IonCardHeader, IonCardContent, IonCardTitle, IonList, IonLabel, IonNote, IonIcon } from '@ionic/angular/standalone';
 import { VehiculoService } from 'src/app/services/vehiculo.service';
 import { OperadorService } from 'src/app/services/operador.service';
 import { first } from 'rxjs';
@@ -13,7 +13,7 @@ import { AuthService } from 'src/app/services/auth.service';
   templateUrl: './detalle.page.html',
   styleUrls: ['./detalle.page.scss'],
   standalone: true,
-  imports: [IonItem, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonContent, IonHeader, IonTitle, IonToolbar, 
+  imports: [IonIcon, IonItem, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonContent, IonHeader, IonTitle, IonToolbar, 
     CommonModule, FormsModule, IonGrid, IonRow, IonCol, IonButton, IonButtons, IonCard, IonCardHeader, IonCardContent, IonCardTitle,
   IonList, IonLabel, IonNote] 
 })

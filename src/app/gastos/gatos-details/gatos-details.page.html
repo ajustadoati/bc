@@ -1,8 +1,10 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Detalles del Gasto </ion-title>
+    <ion-title>Detalles de Gasto </ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="cerrarModal()">Cerrar</ion-button>
+      <ion-button (click)="cerrarModal()">
+        <ion-icon slot="start" name="log-out-outline"></ion-icon>
+      </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
@@ -10,7 +12,7 @@
 <ion-content>
   <ion-card *ngIf="selectedExpense">
     <ion-card-header>
-      <ion-card-title>Información del Gasto</ion-card-title>
+      <ion-card-title>Información</ion-card-title>
     </ion-card-header>
     <ion-card-content>
       <ion-grid>

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar, ModalController, IonLabel, IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonInput, IonItem, IonSelect, IonSelectOption } from '@ionic/angular/standalone';
+import { IonContent, IonHeader, IonTitle, IonToolbar, ModalController, IonLabel, IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonInput, IonItem, IonSelect, IonSelectOption, IonIcon } from '@ionic/angular/standalone';
 import { OperadorService } from 'src/app/services/operador.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { UserService } from 'src/app/services/user.service';
@@ -11,7 +11,7 @@ import { UserService } from 'src/app/services/user.service';
   templateUrl: './crear.page.html',
   styleUrls: ['./crear.page.scss'],
   standalone: true,
-  imports: [IonButtons, IonCardTitle, IonCardHeader, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonCard, IonCardTitle, IonCardContent, 
+  imports: [IonIcon, IonButtons, IonCardTitle, IonCardHeader, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonCard, IonCardTitle, IonCardContent, 
     IonItem, IonLabel, IonInput, IonButton, IonSelect, IonSelectOption, IonButtons]
 })
 export class CrearPage implements OnInit {

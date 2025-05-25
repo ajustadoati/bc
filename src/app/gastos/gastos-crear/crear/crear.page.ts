@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, formatDate } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonButtons, IonButton, IonList, IonItem, IonLabel, IonBackButton, IonSelectOption, IonSelect, IonInput} from '@ionic/angular/standalone';
+import { IonContent, IonHeader, IonTitle, IonToolbar, IonButtons, IonButton, IonList, IonItem, IonLabel, 
+  IonBackButton, IonSelectOption, IonSelect, IonInput} from '@ionic/angular/standalone';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GastoService } from 'src/app/services/gasto.service';
 import { ModalController } from '@ionic/angular';
@@ -16,7 +17,7 @@ import { AlertController } from '@ionic/angular/standalone';
   styleUrls: ['./crear.page.scss'],
   standalone: true,
   imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonButton, IonItem, IonLabel, IonSelectOption, FormsModule,
-    ReactiveFormsModule, IonSelectOption, IonSelect, IonInput  ]
+    ReactiveFormsModule, IonSelectOption, IonSelect, IonInput, IonButtons, IonBackButton  ]
 })
 export class CrearPage implements OnInit {
   formGasto: FormGroup;

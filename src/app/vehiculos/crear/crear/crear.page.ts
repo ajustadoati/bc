@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonCardHeader, IonCard, IonCardTitle, IonCardContent, IonItem, IonLabel, IonInput, IonButton, IonSelect, IonSelectOption, IonList, IonBackButton, IonButtons } from '@ionic/angular/standalone';
+import { IonContent, IonHeader, IonTitle, IonToolbar, IonCardHeader, IonCard, IonCardTitle, IonCardContent, IonItem, IonLabel, IonInput, IonButton, IonSelect, IonSelectOption, IonList, IonBackButton, IonButtons, IonIcon } from '@ionic/angular/standalone';
 import { VehiculoService } from 'src/app/services/vehiculo.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { ModalController } from '@ionic/angular';
@@ -13,7 +13,7 @@ import { VehicleTypeService } from 'src/app/services/vehicle-type.service';
   templateUrl: './crear.page.html',
   styleUrls: ['./crear.page.scss'],
   standalone: true,
-  imports: [IonButtons, IonCardTitle, IonCardHeader, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonCard, IonCardTitle, IonCardContent, 
+  imports: [IonIcon, IonButtons, IonCardTitle, IonCardHeader, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonCard, IonCardTitle, IonCardContent, 
     IonItem, IonLabel, IonInput, IonButton, IonSelect, IonSelectOption, IonButtons],
 })
 export class CrearPage implements OnInit {

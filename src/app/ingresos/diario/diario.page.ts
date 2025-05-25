@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule, formatDate } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { IonButton, IonGrid, IonRow, IonCard, IonCardContent, IonContent, IonHeader, IonItem, IonLabel, IonList, IonListHeader, IonSelectOption, IonTitle, IonToolbar, IonButtons, IonModal, IonDatetime, IonDatetimeButton, IonSelect, IonInput, IonCol } from '@ionic/angular/standalone';
+import { IonButton, IonGrid, IonRow, IonCard, IonCardContent, IonContent, IonHeader, IonItem, IonLabel, IonList, IonListHeader, IonSelectOption, IonTitle, IonToolbar, IonButtons, IonModal, IonDatetime, IonDatetimeButton, IonSelect, IonInput, IonCol, IonIcon } from '@ionic/angular/standalone';
 import { PaymentTypeService } from 'src/app/services/payment-type.service';
 import { UserService } from 'src/app/services/user.service';
 import { VehiculoService } from 'src/app/services/vehiculo.service';
@@ -17,7 +17,7 @@ import { firstValueFrom } from 'rxjs';
   templateUrl: './diario.page.html',
   styleUrls: ['./diario.page.scss'],
   standalone: true,
-  imports: [IonCol, IonButtons, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonItem, IonLabel, 
+  imports: [IonIcon, IonCol, IonButtons, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonItem, IonLabel, 
     IonCard, IonCardContent, IonSelectOption, IonList, IonListHeader, IonButton, ReactiveFormsModule,
     IonButton, IonButtons,IonSelect, IonInput, IonGrid, IonRow
   ] 
