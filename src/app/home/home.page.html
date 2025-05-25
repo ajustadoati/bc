@@ -3,6 +3,7 @@
     <ion-title>Control de Vehículos</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="logout()">
+        <ion-icon slot="start" name="log-out-outline"></ion-icon>
         Salir
       </ion-button>
     </ion-buttons>
@@ -12,15 +13,40 @@
 <ion-content>
   <ion-grid>
     <ion-row>
-      <ion-col size="6"><ion-button expand="full" routerLink="/ingresos">Ingresos</ion-button></ion-col>
-      <ion-col size="6"><ion-button expand="full" routerLink="/gastos">Gastos</ion-button></ion-col>
+      <ion-col size="6">
+        <ion-button expand="block" routerLink="/ingresos" class="icon-button">
+          <ion-icon name="cash-outline"></ion-icon>
+          <div>Ingresos</div>
+        </ion-button>
+      </ion-col>
+      <ion-col size="6">
+        <ion-button expand="block" routerLink="/gastos" class="icon-button">
+          <ion-icon name="card-outline"></ion-icon>
+          <div>Gastos</div>
+        </ion-button>
+      </ion-col>
     </ion-row>
     <ion-row>
-      <ion-col size="6"><ion-button expand="full" routerLink="/vehiculos">Vehículos</ion-button></ion-col>
-      <ion-col size="6"><ion-button expand="full" routerLink="/operadores">Operadores</ion-button></ion-col>
+      <ion-col size="6">
+        <ion-button expand="block" routerLink="/vehiculos" class="icon-button">
+          <ion-icon name="car-sport-outline"></ion-icon>
+          <div>Vehículos</div>
+        </ion-button>
+      </ion-col>
+      <ion-col size="6">
+        <ion-button expand="block" routerLink="/operadores" class="icon-button">
+          <ion-icon name="people-outline"></ion-icon>
+          <div>Operadores</div>
+        </ion-button>
+      </ion-col>
     </ion-row>
     <ion-row>
-      <ion-col size="12"><ion-button expand="full" routerLink="/set-up">Configuración</ion-button> </ion-col>
+      <ion-col size="12">
+        <ion-button expand="block" routerLink="/set-up" class="icon-button">
+          <ion-icon name="settings-outline"></ion-icon>
+          <div>Configuración</div>
+        </ion-button>
+      </ion-col>
     </ion-row>
   </ion-grid>
 </ion-content>

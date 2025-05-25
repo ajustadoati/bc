@@ -22,11 +22,18 @@
 
         <ion-item class="custom-item">
           <ion-label>Colector:</ion-label>
-          <ion-select formControlName="userColectorId">
+          <ion-select formControlName="userColectorId" (ionChange)="onColectorChange($event.detail.value)">
             <ion-select-option *ngFor="let user of collectors" [value]="user.id">
               {{ user.firstName }}
             </ion-select-option>
+            <ion-select-option value="other">Otro</ion-select-option>
           </ion-select>
+
+        </ion-item>
+
+        <ion-item *ngIf="isOtherColectorSelected" class="custom-item">
+          <ion-label position="stacked">Nombre del nuevo colector:</ion-label>
+          <ion-input formControlName="otherColectorName"></ion-input>
         </ion-item>
 
         <ion-item class="custom-item">

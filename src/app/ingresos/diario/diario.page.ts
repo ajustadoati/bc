@@ -9,6 +9,8 @@ import { ModalController } from '@ionic/angular';
 import { AuthService } from 'src/app/services/auth.service';
 import { DailyPaymentService } from 'src/app/services/daily-payment.service';
 import { AlertController } from '@ionic/angular/standalone';
+import { OperadorService } from 'src/app/services/operador.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-diario',
@@ -32,6 +34,7 @@ export class DiarioPage implements OnInit {
   date!: Date;
   conductors: any[] = [];
   collectors:any[] = [];
+  isOtherColectorSelected = false;
 
   constructor(
     private fb: FormBuilder,
@@ -41,11 +44,13 @@ export class DiarioPage implements OnInit {
     private modalCtrl: ModalController,
     private userService: UserService,
     private dailyPaymentService: DailyPaymentService,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private operadorService: OperadorService
   ) {
     this.dailyPaymentForm = this.fb.group({
       userId: [''],
       userColectorId: ['', Validators.required],
+      otherColectorName: [''],
       userDriverId: ['', Validators.required],
       vehicleId: ['', Validators.required],
       dailyDate: [formatDate(new Date(), 'yyyy-MM-dd', 'en-US')],
@@ -101,6 +106,16 @@ export class DiarioPage implements OnInit {
 
   }
 
+  onColectorChange(value: string) {
+    this.isOtherColectorSelected = value === 'other';
+    if (this.isOtherColectorSelected) {
+      this.dailyPaymentForm.get('otherColectorName')?.setValidators([Validators.required]);
+    } else {
+      this.dailyPaymentForm.get('otherColectorName')?.clearValidators();
+      this.dailyPaymentForm.get('otherColectorName')?.setValue('');
+    }
+    this.dailyPaymentForm.get('otherColectorName')?.updateValueAndValidity();
+  }
 
   get dailyPaymentTypes(): FormArray {
     return this.dailyPaymentForm.get('dailyPaymentTypes') as FormArray;
@@ -113,26 +128,50 @@ export class DiarioPage implements OnInit {
     }));
   }
 
-  async submitForm() {
-    if (this.dailyPaymentForm.invalid) {
-      await this.showAlert('Formulario incompleto', 'Por favor, completa todos los campos obligatorios.');
-      return;
-    }
-  
-    this.dailyPaymentForm.value.userId = this.userId;
-  
-    this.dailyPaymentService.agregarPago(this.dailyPaymentForm.value).subscribe({
-      next: async (response) => {
-        console.log(response);
-        await this.showAlert('Éxito', 'Pago diario guardado correctamente.');
-        this.modalCtrl.dismiss();
-      },
-      error: async (err) => {
-        console.error(err);
-        await this.showAlert('Error', 'Error al guardar el pago diario.');
-      }
-    });
+
+
+async submitForm() {
+  if (this.dailyPaymentForm.invalid) {
+    await this.showAlert('Formulario incompleto', 'Por favor, completa todos los campos obligatorios.');
+    return;
   }
+
+  const formValue = this.dailyPaymentForm.value;
+
+  try {
+    // Si se selecciona "Otro", creamos primero al colector
+    if (formValue.userColectorId === 'other') {
+      const newColector = {
+        firstName: formValue.otherColectorName,
+        lastName: 'Colector',
+        numberId: '1-' + formValue.otherColectorName,
+        rol: 'COLECTOR',
+        companyId: this.userId
+      };
+
+      const response = await firstValueFrom(this.operadorService.agregarOperador(newColector));
+      console.log('Usuario agregado correctamente', response.id);
+
+      this.dailyPaymentForm.patchValue({ userColectorId: response.id });
+    }
+
+    this.dailyPaymentForm.patchValue({ userId: this.userId });
+
+    console.log("payload", this.dailyPaymentForm.value);
+
+    await firstValueFrom(this.dailyPaymentService.agregarPago(this.dailyPaymentForm.value));
+
+    await this.showAlert('Éxito', 'Pago diario guardado correctamente.');
+    this.modalCtrl.dismiss();
+
+  } catch (err) {
+    console.error(err);
+    await this.showAlert('Error', 'Error al guardar el pago diario.');
+  }
+}
+
+  
+
 
   async showAlert(header: string, message: string) {
     const alert = await this.alertController.create({
