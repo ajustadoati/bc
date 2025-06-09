@@ -21,7 +21,7 @@
 
   <!-- Listado de vehículos -->
   <ion-list>
-    <ion-item *ngFor="let operador of operadoresFiltrados">
+    <ion-item *ngFor="let operador of operadoresFiltrados" (click)="openOperadoresDetails(operador)">
       <ion-label>
         <h2>Operador: {{ operador.firstName }} {{ operador.lastName }}</h2>
         <p>Cédula: {{ operador.numberId }}</p>

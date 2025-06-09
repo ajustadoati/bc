@@ -101,6 +101,14 @@ export const routes: Routes = [
   {
     path: 'gatos-details',
     loadComponent: () => import('./gastos/gatos-details/gatos-details.page').then( m => m.GatosDetailsPage)
+  },
+  {
+    path: 'vehiculos-details',
+    loadComponent: () => import('./vehiculos/vehiculos-details/vehiculos-details.page').then( m => m.VehiculosDetailsPage)
+  },
+  {
+    path: 'operadores-details',
+    loadComponent: () => import('./operadores/operadores-details/operadores-details.page').then( m => m.OperadoresDetailsPage)
   }
 
 

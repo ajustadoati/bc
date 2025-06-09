@@ -1,23 +1,36 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Nueva Taller</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="closeModal()">
+        <ion-icon slot="start" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
 <ion-content class="ion-padding">
-  <form (ngSubmit)="submitForm()" [formGroup]="formWorkshop">
-    <ion-item>
-      <ion-label position="floating">Nombre del Taller</ion-label>
-      <ion-input formControlName="name"></ion-input>
-    </ion-item>
+  <ion-card>
+    <ion-card-content>
+      <form (ngSubmit)="submitForm()" [formGroup]="formWorkshop">
 
-    <ion-item>
-      <ion-label position="floating">Teléfono</ion-label>
-      <ion-input formControlName="mobileNumber" type="tel"></ion-input>
-    </ion-item>
+        <ion-item>
+          <ion-label position="floating">Nombre del Taller</ion-label>
+          <ion-input formControlName="name"></ion-input>
+        </ion-item>
 
-    <div class="button-group">
-      <ion-button expand="full" type="submit" [disabled]="formWorkshop.invalid">
-        Agregar Taller
-      </ion-button>
+        <ion-item>
+          <ion-label position="floating">Teléfono</ion-label>
+          <ion-input formControlName="mobileNumber" type="tel"></ion-input>
+        </ion-item>
 
-      <ion-button expand="full" type="submit" (click)="closeModal()">
-        Cancelar
-      </ion-button>
-    </div>
-  </form>
+        <div class="button-group">
+          <ion-button expand="full" type="submit" [disabled]="formWorkshop.invalid">
+            Agregar Taller
+          </ion-button>
+        </div>
+      </form>
+
+    </ion-card-content>
+  </ion-card>
 </ion-content>

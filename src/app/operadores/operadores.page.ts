@@ -5,6 +5,7 @@ import { AlertController, IonBackButton, IonButton, IonButtons, IonCard, IonCard
 import { AuthService } from '../services/auth.service';
 import { OperadorService } from '../services/operador.service';
 import { CrearPage } from './crear/crear.page';
+import { OperadoresDetailsPage } from './operadores-details/operadores-details.page';
 
 @Component({
   selector: 'app-operadores',
@@ -77,6 +78,15 @@ export class OperadoresPage implements OnInit {
     });
 
     await alert.present();
+  }
+
+  async openOperadoresDetails(operador: any){
+    const modalOperadorDetails = await this.modalCtrl.create({
+      component: OperadoresDetailsPage,
+      componentProps: { operador }
+    });
+
+    await modalOperadorDetails.present();
   }
 
 }

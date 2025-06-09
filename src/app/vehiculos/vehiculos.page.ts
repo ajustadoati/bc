@@ -6,6 +6,7 @@ import { CrearPage } from './crear/crear/crear.page';
 import { VehiculoService } from '../services/vehiculo.service';
 import { AuthService } from '../services/auth.service';
 import { AlertController } from '@ionic/angular';
+import { VehiculosDetailsPage } from './vehiculos-details/vehiculos-details.page';
 
 @Component({
   selector: 'app-vehiculos',
@@ -82,6 +83,15 @@ export class VehiculosPage implements OnInit {
     });
 
     await alert.present();
+  }
+
+  async openVeiculosDetails(vehiculo: any){
+    const modalVeiculosDetails = await this.modalCtrl.create({
+      component: VehiculosDetailsPage,
+      componentProps: {vehiculo }
+    });
+
+    return await modalVeiculosDetails.present(); 
   }
 
 }

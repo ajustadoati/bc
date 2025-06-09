@@ -1,16 +1,17 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ModalController } from '@ionic/angular';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonButtons, IonList, IonItem,IonLabel } from '@ionic/angular/standalone';
+import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonButtons, IonList, IonItem,IonLabel,IonIcon } from '@ionic/angular/standalone';
 import { TipoGastoService } from 'src/app/services/tipo-gasto.service';
 import { AddSubCategoriaModalPage } from  '../add-sub-categoria-modal/add-sub-categoria-modal.page'
+import { CategoriaModalPage } from '../../set-up/categoria-modal/categoria-modal.page';
 
 @Component({
   selector: 'app-sub-categoria-modal',
   templateUrl: './sub-categoria-modal.page.html',
   styleUrls: ['./sub-categoria-modal.page.scss'],
   standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, IonButton, IonButtons, IonList, IonItem,IonLabel]
+  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, IonButton, IonButtons, IonList, IonItem,IonLabel,IonIcon]
 })
 export class SubCategoriaModalPage implements OnInit {
   @Input() categoryId!: number;
@@ -46,4 +47,8 @@ export class SubCategoriaModalPage implements OnInit {
 
     await modalAddSubCategoria.present();
   }
+
+
+
+
 }

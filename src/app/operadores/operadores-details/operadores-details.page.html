@@ -1,0 +1,46 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Detalles del Operador </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cerrarModal()">
+        <ion-icon slot="end" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-card *ngIf="operador">
+    <ion-card-header>
+      <ion-card-title>Información</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="6">
+            <p> <strong>Nombre:</strong> {{ operador.firstName }} </p>
+          </ion-col>
+          <ion-col>
+            <p> <strong>Apellido:</strong>  {{operador.lastName }} </p>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="6">
+            <p><strong>Tipo:</strong> {{ operador.type }}</p>
+          </ion-col>
+          <ion-col size="6">
+            <p><strong>Teléfono:</strong> {{ operador.mobileNumber || 'No especificado'}}</p>
+          </ion-col>
+          <ion-col size="6">
+            <p><strong>Cédula:</strong> {{ operador.numberId || 'No especificado'}}</p>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="12">
+            <p><strong>Email:</strong> {{ operador.email || 'No especificado' }} </p>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

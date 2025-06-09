@@ -2,8 +2,10 @@
   <ion-toolbar>
     <ion-title>Categorías</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="closeModal()">Cerrar</ion-button>
       <ion-button (click)="addCategoriaModal()">Agregar</ion-button>
+      <ion-button (click)="logout()">
+        <ion-icon slot="start" name="log-out-outline"></ion-icon>
+      </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>

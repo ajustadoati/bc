@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ModalController } from '@ionic/angular';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonLabel,IonButton,IonItem ,IonInput} from '@ionic/angular/standalone';
+import { IonContent, IonHeader, IonTitle, IonToolbar, IonLabel,IonButton,IonItem ,IonInput,IonCardHeader,IonCardTitle,IonCardContent,IonCard,IonIcon, IonButtons } from '@ionic/angular/standalone';
 import { FormBuilder, FormGroup, Validators,ReactiveFormsModule } from '@angular/forms';
 import { CategoriaService } from 'src/app/services/categoria.service'
 
@@ -11,7 +11,9 @@ import { CategoriaService } from 'src/app/services/categoria.service'
   templateUrl: './addcategoria-modal.page.html',
   styleUrls: ['./addcategoria-modal.page.scss'],
   standalone: true,
-  imports: [IonContent, CommonModule, FormsModule,IonLabel, IonContent, CommonModule, FormsModule,IonButton,IonItem,ReactiveFormsModule,IonInput]
+  imports: [IonButtons, IonContent, CommonModule, FormsModule,IonLabel, IonContent, CommonModule, FormsModule,IonButton,IonItem,ReactiveFormsModule,IonInput, IonContent, IonHeader, IonTitle, IonToolbar
+    , IonCard,IonCardContent, IonIcon
+  ]
 })
 export class AddcategoriaModalPage implements OnInit {
   formAddCategorias!: FormGroup;

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ModalController } from '@ionic/angular';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonLabel,IonButton,IonItem ,IonInput} from '@ionic/angular/standalone';
+import { IonContent, IonHeader, IonTitle, IonToolbar, IonLabel, IonButton,IonButtons,IonItem, IonInput, IonIcon, IonCard, IonCardContent} from '@ionic/angular/standalone';
 import { FormBuilder, FormGroup, Validators,ReactiveFormsModule } from '@angular/forms';
 import { TallerService } from 'src/app/services/taller.service';
 
@@ -11,7 +11,7 @@ import { TallerService } from 'src/app/services/taller.service';
   templateUrl: './add-workshop-modal.page.html',
   styleUrls: ['./add-workshop-modal.page.scss'],
   standalone: true,
-  imports: [IonLabel, IonContent, CommonModule, FormsModule,IonButton,IonItem,ReactiveFormsModule,IonInput]
+  imports: [IonLabel, IonContent, CommonModule, FormsModule,IonButton, IonButtons,IonItem,ReactiveFormsModule,IonInput, IonHeader, IonTitle, IonToolbar,IonIcon, IonCard, IonCardContent]
 })
 export class AddWorkshopModalPage implements OnInit {
   formWorkshop!: FormGroup;

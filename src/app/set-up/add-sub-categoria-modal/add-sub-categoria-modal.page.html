@@ -1,33 +1,34 @@
-<ion-header>
+<ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>Tipo de {{ categoriaName }}</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="closeModal()">Cerrar</ion-button>
+      <ion-button (click)="closeModal()">
+        <ion-icon slot="start" name="log-out-outline"></ion-icon>
+      </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <form (ngSubmit)="submitForm()" [formGroup]="formAddSubCategoria">
-    
-    <ion-item>
-      <ion-label position="floating">Tipo</ion-label>
-      <ion-input formControlName="name"></ion-input>
-    </ion-item>
+  <ion-card>
+    <ion-card-content>
+      <form (ngSubmit)="submitForm()" [formGroup]="formAddSubCategoria">
 
-    <ion-item >
-      <ion-label>{{categoriaName}}</ion-label>
-    </ion-item>
+        <ion-item>
+          <ion-label position="floating">Tipo</ion-label>
+          <ion-input formControlName="name"></ion-input>
+        </ion-item>
 
-    <div class="button-group">
-      <ion-button expand="full" type="submit" [disabled]="formAddSubCategoria.invalid">
-        Agregar Tipo
-      </ion-button>
+        <ion-item>
+          <ion-label>{{categoriaName}}</ion-label>
+        </ion-item>
 
-      <ion-button expand="full" (click)="closeModal()">
-        Cancelar
-      </ion-button>
-    </div>
-    
-  </form>
+        <div class="button-group">
+          <ion-button expand="full" type="submit" [disabled]="formAddSubCategoria.invalid">
+            Agregar Tipo
+          </ion-button>
+        </div>
+      </form>
+    </ion-card-content>
+  </ion-card>
 </ion-content>
