@@ -27,10 +27,13 @@
         <p>{{ vehiculo.marca }} {{ vehiculo.model }}</p>
         <p>Placa: {{ vehiculo.serial }}</p>
       </ion-label>
+      <ion-button color="primary" (click)="abrirModalDetalle(vehiculo)">
+        <ion-icon name="create"></ion-icon> Editar
+      </ion-button>
       <ion-button color="danger" (click)="eliminarVehiculo(vehiculo)">
         <ion-icon name="trash"></ion-icon> Eliminar
       </ion-button>
     </ion-item>
-    
+
   </ion-list>
 </ion-content>

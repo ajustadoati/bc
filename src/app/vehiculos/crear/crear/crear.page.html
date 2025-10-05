@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Agregar Vehículo</ion-title>
+    <ion-title>{{ vehiculoEditar ? 'Editar Vehículo' : 'Agregar Vehículo' }}</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="cerrar()">
         <ion-icon slot="start" name="log-out-outline"></ion-icon>
@@ -50,7 +50,7 @@
           <ion-label position="floating">Empresa</ion-label>
           <ion-input type="text" [(ngModel)]="nuevoVehiculo.company" name="company" required></ion-input>
         </ion-item>
-        <ion-button expand="full" type="submit">Registrar</ion-button>
+        <ion-button expand="full" type="submit">{{ vehiculoEditar ? 'Actualizar' : 'Registrar' }}</ion-button>
       </form>
     </ion-card-content>
   </ion-card>

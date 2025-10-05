@@ -50,8 +50,13 @@ export class VehiculosPage implements OnInit {
   async abrirModalDetalle(vehiculo: any) {
     const modal = await this.modalCtrl.create({
       component: CrearPage,
-      componentProps: { vehiculo }
+      componentProps: { vehiculoEditar: vehiculo }
     });
+
+    modal.onDidDismiss().then(() => {
+      this.ngOnInit();
+    });
+
     await modal.present();
   }
 
@@ -59,6 +64,11 @@ export class VehiculosPage implements OnInit {
     const modal = await this.modalCtrl.create({
       component: CrearPage
     });
+
+    modal.onDidDismiss().then(() => {
+      this.ngOnInit();
+    });
+
     await modal.present();
   }
 

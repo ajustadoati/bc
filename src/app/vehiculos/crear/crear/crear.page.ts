@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonCardHeader, IonCard, IonCardTitle, IonCardContent, IonItem, IonLabel, IonInput, IonButton, IonSelect, IonSelectOption, IonList, IonBackButton, IonButtons, IonIcon } from '@ionic/angular/standalone';
@@ -13,11 +13,12 @@ import { VehicleTypeService } from 'src/app/services/vehicle-type.service';
   templateUrl: './crear.page.html',
   styleUrls: ['./crear.page.scss'],
   standalone: true,
-  imports: [IonIcon, IonButtons, IonCardTitle, IonCardHeader, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonCard, IonCardTitle, IonCardContent, 
+  imports: [IonIcon, IonButtons, IonCardTitle, IonCardHeader, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonCard, IonCardTitle, IonCardContent,
     IonItem, IonLabel, IonInput, IonButton, IonSelect, IonSelectOption, IonButtons],
 })
 export class CrearPage implements OnInit {
 
+  @Input() vehiculoEditar: any = null;
   vehiculos: any[] = [];
 
   vehicleTypes: { id: string, type: string }[] = [];
@@ -37,23 +38,38 @@ export class CrearPage implements OnInit {
     private vehicleTypeService: VehicleTypeService
   ) {}
 
-  // Método para agregar un vehículo
+  // Método para agregar o actualizar un vehículo
   agregarVehiculo() {
-    console.log("Agregando vehiculo",this.nuevoVehiculo);
+    console.log("Guardando vehiculo", this.nuevoVehiculo);
     this.nuevoVehiculo.userId = this.authService.getUserId();
     if (this.validarVehiculo(this.nuevoVehiculo)) {
-      // Enviar al servicio
-      this.vehiculoService.agregarVehiculo(this.nuevoVehiculo).subscribe({
-        next: (response) => {
-          alert('Vehículo agregado correctamente');
-          this.vehiculos.push(response); // Agregar a la lista local si es necesario
-          this.limpiarFormulario();
-        },
-        error: (err) => {
-          alert('Error al agregar vehículo');
-          console.error(err);
-        }
-      });
+      if (this.vehiculoEditar) {
+        // Actualizar vehículo existente
+        this.vehiculoService.actualizarVehiculo(this.vehiculoEditar.id, this.nuevoVehiculo).subscribe({
+          next: (response) => {
+            alert('Vehículo actualizado correctamente');
+            this.cerrar();
+          },
+          error: (err) => {
+            alert('Error al actualizar vehículo');
+            console.error(err);
+          }
+        });
+      } else {
+        // Crear nuevo vehículo
+        this.vehiculoService.agregarVehiculo(this.nuevoVehiculo).subscribe({
+          next: (response) => {
+            alert('Vehículo agregado correctamente');
+            this.vehiculos.push(response);
+            this.limpiarFormulario();
+            this.cerrar();
+          },
+          error: (err) => {
+            alert('Error al agregar vehículo');
+            console.error(err);
+          }
+        });
+      }
     } else {
       alert('Por favor, completa correctamente los campos.');
     }
@@ -78,7 +94,21 @@ export class CrearPage implements OnInit {
     this.obtenerVehiculos();
     this.vehicleTypeService.getTipoVehiculos().subscribe(types => {
       this.vehicleTypes = types;
-    }); // Cargar los vehículos al abrir la página
+    });
+
+    // Si es edición, cargar datos del vehículo
+    if (this.vehiculoEditar) {
+      console.log('Vehiculo a editar:', this.vehiculoEditar);
+      this.nuevoVehiculo = {
+        numberId: this.vehiculoEditar.numberId,
+        marca: this.vehiculoEditar.marca,
+        model: this.vehiculoEditar.model,
+        serial: this.vehiculoEditar.serial,
+        company: this.vehiculoEditar.company,
+        userId: this.vehiculoEditar.userId || this.authService.getUserId(),
+        vehicleType: this.vehiculoEditar.vehicleType
+      };
+    }
   }
 
   obtenerVehiculos() {
