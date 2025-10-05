@@ -21,16 +21,16 @@
 
   <!-- Listado de vehículos -->
   <ion-list>
-    <ion-item *ngFor="let vehiculo of vehiculos" (click)="openVeiculosDetails(vehiculo)">
+    <ion-item *ngFor="let vehiculo of vehiculos" (click)="openVehiculosDetails(vehiculo)">
       <ion-label>
         <h2>Unidad: {{ vehiculo.numberId }}</h2>
         <p>{{ vehiculo.marca }} {{ vehiculo.model }}</p>
         <p>Placa: {{ vehiculo.serial }}</p>
       </ion-label>
-      <ion-button color="primary" (click)="abrirModalDetalle(vehiculo)">
+      <ion-button color="primary" (click)="abrirModalDetalle(vehiculo); $event.stopPropagation()">
         <ion-icon name="create"></ion-icon> Editar
       </ion-button>
-      <ion-button color="danger" (click)="eliminarVehiculo(vehiculo)">
+      <ion-button color="danger" (click)="eliminarVehiculo(vehiculo); $event.stopPropagation()">
         <ion-icon name="trash"></ion-icon> Eliminar
       </ion-button>
     </ion-item>

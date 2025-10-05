@@ -27,7 +27,7 @@
         <p>Cédula: {{ operador.numberId }}</p>
         <p>Tipo: {{ operador.type }}</p>
       </ion-label>
-      <ion-button color="danger" (click)="eliminarOperador(operador)">
+      <ion-button color="danger" (click)="eliminarOperador(operador); $event.stopPropagation()" >
         <ion-icon name="trash"></ion-icon> Eliminar
       </ion-button>
     </ion-item>

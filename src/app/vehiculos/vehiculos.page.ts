@@ -95,13 +95,14 @@ export class VehiculosPage implements OnInit {
     await alert.present();
   }
 
-  async openVeiculosDetails(vehiculo: any){
-    const modalVeiculosDetails = await this.modalCtrl.create({
+  async openVehiculosDetails(vehiculo: any){
+    console.log("opening details");
+    const modalVehiculosDetails = await this.modalCtrl.create({
       component: VehiculosDetailsPage,
       componentProps: {vehiculo }
     });
 
-    return await modalVeiculosDetails.present(); 
+    return await modalVehiculosDetails.present(); 
   }
 
 }
