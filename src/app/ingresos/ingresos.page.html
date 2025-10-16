@@ -13,14 +13,58 @@
 </ion-header>
 
 <ion-content>
-  <ion-list>
-    <ion-item *ngFor="let payment of dailyPayments">
-      <ion-label>
-        <h2>{{ payment.dailyDate | date:'dd-MM-yy' }}</h2>
-        <p>{{ getTotal(payment.dailyPaymentTypes) | number:'1.2-2' }}</p>
-        <p>Unidad: {{ getVehicleNumberId(payment.vehicleId) }}</p>
-      </ion-label>
-      <ion-button fill="outline" slot="end" (click)="abrirModalDetalle(payment)">Ver Detalle</ion-button>
-    </ion-item>
-  </ion-list>
+  <div class="payment-cards">
+    <ion-card *ngFor="let payment of dailyPayments" class="payment-card compact">
+      <ion-card-content>
+        <div class="card-header">
+          <div class="date-info">
+            <h3>{{ payment.dailyDate | date:'dd/MM/yyyy' }}</h3>
+          </div>
+          <div class="total-badge">
+            <span class="amount">{{ getTotal(payment.dailyPaymentTypes) | currency:'USD':'symbol':'1.0-0' }}</span>
+          </div>
+        </div>
+        
+        <div class="card-body">
+          <div class="quick-info">
+            <span class="info-item">
+              <ion-icon name="bus-outline"></ion-icon>
+              Unidad {{ getVehicleNumberId(payment.vehicleId) }}
+            </span>
+            <span class="info-item" *ngIf="payment.kilometerStart && payment.kilometerEnd">
+              <ion-icon name="speedometer-outline"></ion-icon>
+              {{ payment.kilometerEnd - payment.kilometerStart }} km
+            </span>
+            <span class="info-item" *ngIf="hasDriverInfo(payment)">
+              <ion-icon name="person-outline"></ion-icon>
+              {{ getDriversCount(payment) }} chofer(es)
+            </span>
+          </div>
+        </div>
+        
+        <div class="card-actions">
+          <ion-button fill="clear" size="small" (click)="abrirModalDetalle(payment)">
+            <ion-icon name="eye-outline" slot="start"></ion-icon>
+            Ver Detalle
+          </ion-button>
+          <span class="payment-count">{{ payment.dailyPaymentTypes.length }} registros</span>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+  
+  <!-- Mensaje cuando no hay datos -->
+  <div *ngIf="dailyPayments && dailyPayments.length === 0" class="empty-state">
+    <ion-card>
+      <ion-card-content class="ion-text-center">
+        <ion-icon name="document-outline" size="large" color="medium"></ion-icon>
+        <h3>No hay ingresos registrados</h3>
+        <p>Comienza agregando tu primer ingreso diario</p>
+        <ion-button (click)="abrirModalAgregar(user.userId)" color="primary">
+          <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+          Agregar Primer Ingreso
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </div>
 </ion-content>

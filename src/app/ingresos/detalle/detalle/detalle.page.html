@@ -10,40 +10,63 @@
 </ion-header>
 
 <ion-content>
-  <ion-card>
+  <!-- Header compacto con fecha y total -->
+  <div class="detail-header">
+    <div class="date-section">
+      <h2>{{ payment.dailyDate | date:'dd/MM/yyyy' }}</h2>
+    </div>
+    <div class="total-section">
+      <span class="total-amount">{{ getTotal() | currency:'USD':'symbol':'1.0-0' }}</span>
+    </div>
+  </div>
+
+  <!-- Información básica -->
+  <ion-card class="compact-card">
+    <ion-card-content>
+      <div class="info-grid">
+        <div class="info-item">
+          <ion-icon name="bus-outline"></ion-icon>
+          <span>Unidad {{ vehiculo?.numberId || 'N/A' }}</span>
+        </div>
+        <div class="info-item" *ngIf="payment.kilometerStart && payment.kilometerEnd">
+          <ion-icon name="speedometer-outline"></ion-icon>
+          <span>{{ payment.kilometerEnd - payment.kilometerStart }} km</span>
+        </div>
+        <div class="info-item">
+          <ion-icon name="person-outline"></ion-icon>
+          <span>{{ chofer?.firstName || 'Sin chofer' }}</span>
+        </div>
+        <div class="info-item" *ngIf="segundoChofer">
+          <ion-icon name="person-add-outline"></ion-icon>
+          <span>{{ segundoChofer?.firstName }} (2do)</span>
+        </div>
+        <div class="info-item" *ngIf="colector">
+          <ion-icon name="wallet-outline"></ion-icon>
+          <span>{{ colector?.firstName }} (Colector)</span>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Lista de pagos compacta -->
+  <ion-card class="compact-card">
     <ion-card-header>
-      <ion-card-title>Desglose</ion-card-title>
+      <ion-card-title class="small-title">Ingresos ({{ paymentTypes.length }} tipos)</ion-card-title>
     </ion-card-header>
     <ion-card-content>
-      <ion-grid>
-        <ion-row>
-          <ion-col size="6">
-            <p><strong>Chofer:</strong> {{chofer?.firstName}}</p>
-          </ion-col>
-          <ion-col size="6">
-            <p><strong>Colector:</strong> {{ colector?.firstName}}</p>
-          </ion-col>
-        </ion-row>
-        <ion-row>
-          <ion-col size="6">
-            <p><strong>Unidad:</strong> {{ vehiculo.numberId }}</p>
-          </ion-col>
-          <ion-col size="6">
-            <p><strong>Kilómetros:</strong> {{ payment.kilometerStart }} - {{ payment.kilometerEnd }}</p>
-          </ion-col>
-        </ion-row>
-        <ion-row>
-          <ion-col size="12">
-            <p><strong>Montos:</strong></p>
-            <ion-list>
-              <ion-item *ngFor="let type of paymentTypes">
-                <ion-label>{{ type.paymentName }}</ion-label>
-                <ion-note slot="end">{{ type.amount | number:'1.2-2' }}</ion-note>
-              </ion-item>
-            </ion-list>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
+      <div class="payments-list">
+        <div class="payment-item" *ngFor="let type of paymentTypes; let i = index">
+          <div class="payment-info">
+            <span class="payment-name">{{ type.paymentName }}</span>
+            <span class="payment-amount">{{ type.amount | currency:'USD':'symbol':'1.0-0' }}</span>
+          </div>
+          <div class="payment-percent">
+            <ion-chip [color]="getPaymentChipColor(i)" size="small">
+              {{ ((type.amount / getTotal()) * 100) | number:'1.0-0' }}%
+            </ion-chip>
+          </div>
+        </div>
+      </div>
     </ion-card-content>
   </ion-card>
 </ion-content>

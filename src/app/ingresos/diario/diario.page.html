@@ -23,6 +23,25 @@
         </ion-item>
 
         <ion-item class="custom-item">
+          <ion-label>¿Hay segundo chofer?</ion-label>
+          <ion-toggle (ionChange)="onSecondDriverToggle($event)"></ion-toggle>
+        </ion-item>
+
+        <ion-item *ngIf="hasSecondDriver" class="custom-item">
+          <ion-label>Segundo Chofer:</ion-label>
+          <ion-select formControlName="userSecondDriverId">
+            <ion-select-option *ngFor="let user of conductors" [value]="user.id">
+              {{ user.firstName }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item class="custom-item">
+          <ion-label>¿Hay colector?</ion-label>
+          <ion-toggle (ionChange)="onCollectorToggle($event)"></ion-toggle>
+        </ion-item>
+
+        <ion-item *ngIf="hasCollector" class="custom-item">
           <ion-label>Colector:</ion-label>
           <ion-select formControlName="userColectorId" (ionChange)="onColectorChange($event.detail.value)">
             <ion-select-option *ngFor="let user of collectors" [value]="user.id">
@@ -30,10 +49,9 @@
             </ion-select-option>
             <ion-select-option value="other">Otro</ion-select-option>
           </ion-select>
-
         </ion-item>
 
-        <ion-item *ngIf="isOtherColectorSelected" class="custom-item">
+        <ion-item *ngIf="hasCollector && isOtherColectorSelected" class="custom-item">
           <ion-label position="stacked">Nombre del nuevo colector:</ion-label>
           <ion-input formControlName="otherColectorName"></ion-input>
         </ion-item>

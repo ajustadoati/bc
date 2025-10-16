@@ -1,0 +1,135 @@
+ion-content {
+  --padding-top: 8px;
+  --padding-bottom: 8px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: var(--ion-color-light);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  
+  .date-section {
+    h2 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin: 0;
+      color: var(--ion-text-color);
+    }
+    
+    p {
+      font-size: 0.85rem;
+      color: var(--ion-color-medium);
+      margin: 2px 0 0 0;
+      text-transform: capitalize;
+    }
+  }
+  
+  .total-section {
+    .total-amount {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: var(--ion-color-success);
+      padding: 6px 12px;
+      background: rgba(var(--ion-color-success-rgb), 0.1);
+      border-radius: 8px;
+    }
+  }
+}
+
+.compact-card {
+  margin-bottom: 12px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  
+  ion-card-content {
+    padding: 12px;
+  }
+  
+  ion-card-header {
+    padding: 12px 12px 0 12px;
+    
+    .small-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0;
+    }
+  }
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  
+  .info-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    ion-icon {
+      font-size: 16px;
+      color: var(--ion-color-primary);
+      flex-shrink: 0;
+    }
+    
+    span {
+      font-size: 0.85rem;
+      color: var(--ion-color-dark);
+      font-weight: 500;
+    }
+  }
+}
+
+.payments-list {
+  .payment-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--ion-color-light-shade);
+    
+    &:last-child {
+      border-bottom: none;
+    }
+    
+    .payment-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      
+      .payment-name {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--ion-text-color);
+      }
+      
+      .payment-amount {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--ion-color-success);
+      }
+    }
+    
+    .payment-percent {
+      ion-chip {
+        font-size: 0.7rem;
+        font-weight: 600;
+        --background: rgba(var(--ion-color-primary-rgb), 0.1);
+        --color: var(--ion-color-primary);
+      }
+    }
+  }
+}
+
+// Responsive para pantallas pequeñas
+@media (max-width: 768px) {
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}

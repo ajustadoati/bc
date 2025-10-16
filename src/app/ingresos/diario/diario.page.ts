@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule, formatDate } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { IonButton, IonGrid, IonRow, IonCard, IonCardContent, IonContent, IonHeader, IonItem, IonLabel, IonList, IonListHeader, IonSelectOption, IonTitle, IonToolbar, IonButtons, IonModal, IonDatetime, IonDatetimeButton, IonSelect, IonInput, IonCol, IonIcon } from '@ionic/angular/standalone';
+import { IonButton, IonGrid, IonRow, IonCard, IonCardContent, IonContent, IonHeader, IonItem, IonLabel, IonList, IonListHeader, IonSelectOption, IonTitle, IonToolbar, IonButtons, IonModal, IonDatetime, IonDatetimeButton, IonSelect, IonInput, IonCol, IonIcon, IonToggle } from '@ionic/angular/standalone';
 import { PaymentTypeService } from 'src/app/services/payment-type.service';
 import { UserService } from 'src/app/services/user.service';
 import { VehiculoService } from 'src/app/services/vehiculo.service';
@@ -19,8 +19,8 @@ import { firstValueFrom } from 'rxjs';
   standalone: true,
   imports: [IonIcon, IonCol, IonButtons, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonItem, IonLabel, 
     IonCard, IonCardContent, IonSelectOption, IonList, IonListHeader, IonButton, ReactiveFormsModule,
-    IonButton, IonButtons,IonSelect, IonInput, IonGrid, IonRow
-  ] 
+    IonButton, IonButtons,IonSelect, IonInput, IonGrid, IonRow, IonToggle
+  ]
 })
 export class DiarioPage implements OnInit {
 
@@ -35,6 +35,8 @@ export class DiarioPage implements OnInit {
   conductors: any[] = [];
   collectors:any[] = [];
   isOtherColectorSelected = false;
+  hasSecondDriver = false;
+  hasCollector = false;
 
   constructor(
     private fb: FormBuilder,
@@ -49,9 +51,10 @@ export class DiarioPage implements OnInit {
   ) {
     this.dailyPaymentForm = this.fb.group({
       userId: [''],
-      userColectorId: ['', Validators.required],
+      userColectorId: [''],
       otherColectorName: [''],
       userDriverId: ['', Validators.required],
+      userSecondDriverId: [''],
       vehicleId: ['', Validators.required],
       dailyDate: [formatDate(new Date(), 'yyyy-MM-dd', 'en-US')],
       kilometerStart: [''],
@@ -117,6 +120,30 @@ export class DiarioPage implements OnInit {
     this.dailyPaymentForm.get('otherColectorName')?.updateValueAndValidity();
   }
 
+  onCollectorToggle(event: any) {
+    this.hasCollector = event.detail.checked;
+    if (this.hasCollector) {
+      this.dailyPaymentForm.get('userColectorId')?.setValidators([Validators.required]);
+    } else {
+      this.dailyPaymentForm.get('userColectorId')?.clearValidators();
+      this.dailyPaymentForm.get('userColectorId')?.setValue('');
+      this.dailyPaymentForm.get('otherColectorName')?.setValue('');
+      this.isOtherColectorSelected = false;
+    }
+    this.dailyPaymentForm.get('userColectorId')?.updateValueAndValidity();
+  }
+
+  onSecondDriverToggle(event: any) {
+    this.hasSecondDriver = event.detail.checked;
+    if (this.hasSecondDriver) {
+      this.dailyPaymentForm.get('userSecondDriverId')?.setValidators([Validators.required]);
+    } else {
+      this.dailyPaymentForm.get('userSecondDriverId')?.clearValidators();
+      this.dailyPaymentForm.get('userSecondDriverId')?.setValue('');
+    }
+    this.dailyPaymentForm.get('userSecondDriverId')?.updateValueAndValidity();
+  }
+
   get dailyPaymentTypes(): FormArray {
     return this.dailyPaymentForm.get('dailyPaymentTypes') as FormArray;
   }
@@ -139,8 +166,8 @@ async submitForm() {
   const formValue = this.dailyPaymentForm.value;
 
   try {
-    // Si se selecciona "Otro", creamos primero al colector
-    if (formValue.userColectorId === 'other') {
+    // Si hay colector y se selecciona "Otro", creamos primero al colector
+    if (this.hasCollector && formValue.userColectorId === 'other') {
       const newColector = {
         firstName: formValue.otherColectorName,
         lastName: 'Colector',
@@ -153,6 +180,11 @@ async submitForm() {
       console.log('Usuario agregado correctamente', response.id);
 
       this.dailyPaymentForm.patchValue({ userColectorId: response.id });
+    }
+
+    // Si no hay colector, limpiar el campo
+    if (!this.hasCollector) {
+      this.dailyPaymentForm.patchValue({ userColectorId: null });
     }
 
     this.dailyPaymentForm.patchValue({ userId: this.userId });
