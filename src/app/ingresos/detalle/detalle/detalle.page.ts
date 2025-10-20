@@ -1,10 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonButton, IonButtons, IonCard, IonCol, IonContent, IonGrid, IonHeader, IonRow, IonTitle, IonToolbar, ModalController, IonItem, IonCardHeader, IonCardContent, IonCardTitle, IonList, IonLabel, IonNote, IonIcon, IonCardSubtitle, IonChip, IonAvatar } from '@ionic/angular/standalone';
+import { IonButton, IonButtons, IonCard, IonContent, IonHeader, IonTitle, IonToolbar, ModalController, IonCardHeader, IonCardContent, IonCardTitle, IonIcon, IonChip } from '@ionic/angular/standalone';
 import { VehiculoService } from 'src/app/services/vehiculo.service';
 import { OperadorService } from 'src/app/services/operador.service';
-import { first } from 'rxjs';
 import { PaymentTypeService } from 'src/app/services/payment-type.service';
 import { AuthService } from 'src/app/services/auth.service';
 
@@ -13,7 +12,8 @@ import { AuthService } from 'src/app/services/auth.service';
   templateUrl: './detalle.page.html',
   styleUrls: ['./detalle.page.scss'],
   standalone: true,
-  imports: [IonIcon, IonItem, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonGrid, IonRow, IonCol, IonButton, IonButtons, IonCard, IonCardHeader, IonCardContent, IonCardTitle, IonList, IonLabel, IonNote, IonCardSubtitle, IonChip, IonAvatar]
+  imports: [IonIcon, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonButton, IonButtons, IonCard, IonCardHeader, IonCardContent, IonCardTitle, 
+    IonChip]
 })
 export class DetallePage implements OnInit {
 

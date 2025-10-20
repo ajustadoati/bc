@@ -18,7 +18,7 @@
       <ion-card-content>
         <div class="card-header">
           <div class="date-info">
-            <h3>{{ payment.dailyDate | date:'dd/MM/yyyy' }}</h3>
+            <h3>{{ getLocalDate(payment.dailyDate) | date:'dd/MM/yyyy':'-04:00' }}</h3>
           </div>
           <div class="total-badge">
             <span class="amount">{{ getTotal(payment.dailyPaymentTypes) | currency:'USD':'symbol':'1.0-0' }}</span>
