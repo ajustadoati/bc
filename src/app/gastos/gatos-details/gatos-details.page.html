@@ -34,5 +34,16 @@
         </ion-row>
       </ion-grid>
     </ion-card-content>
+
   </ion-card>
+    <ion-button expand="block" id="button-eliminar" (click)="confirmarEliminacion()" >
+      Eliminar gasto
+    </ion-button>
 </ion-content>
+
+<ion-alert
+  [isOpen]="showAlert"
+  header="Confirmar eliminación"
+  message="¿Seguro que quieres eliminar este gasto?"
+  [buttons]="alertButtons">
+</ion-alert>

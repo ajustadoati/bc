@@ -42,6 +42,17 @@ export class GastosListPage implements OnInit {
     this.router.navigate(['/vehiculos', this.vehicleId, 'gastos','nuevo']);
   }
 
+  // eliminarGasto(expenseId: number) {
+  //   this.gastoService.eliminar(expenseId).subscribe({
+  //     next: () => {
+  //       this.expenses = this.expenses.filter(exp => exp.id !== expenseId);
+  //     },
+  //     error: (err) => {
+  //       console.error('Error eliminando gasto:', err);
+  //     }
+  //   });
+  // }
+
   async openGastosDetails(expenseId: number){
     const modalGatosDetails = await this.modalCtrl.create({
       component: GatosDetailsPage,

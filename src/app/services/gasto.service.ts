@@ -25,5 +25,10 @@ export class GastoService {
     return this.http.post<any>(this.apiUrl, gasto);
   }
 
+  eliminar(gastoId: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${gastoId}`);
+  }
+
+
 
 }
