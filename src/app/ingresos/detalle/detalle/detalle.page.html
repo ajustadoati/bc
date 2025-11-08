@@ -69,4 +69,17 @@
       </div>
     </ion-card-content>
   </ion-card>
+
+  <ion-button id="button-eliminar" (click)="confirmarEliminacion()">Eliminar Pago
+    <ion-icon slot="start" name="trash-outline"></ion-icon>
+  </ion-button>
+
 </ion-content>
+
+<ion-alert
+  [isOpen]="showAlert"
+  header="Confirmar eliminación"
+  message="¿Seguro que quieres eliminar este pago?"
+  [buttons]="alertButtons">
+</ion-alert>
+

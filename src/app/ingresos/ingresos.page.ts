@@ -50,7 +50,14 @@ export class IngresosPage implements OnInit {
         payment: payment
       }
     });
-    return await modal.present();
+    await modal.present();
+ 
+    const { data } = await modal.onDidDismiss();
+
+    if (data?.eliminado) {
+      // Eliminar el pago de la lista local sin recargar
+      this.dailyPayments = this.dailyPayments.filter((p: { dailyPaymentId: any; }) => p.dailyPaymentId !== data.eliminado.dailyPaymentId);
+    }
   }
 
   cargarPagos() {

@@ -1,11 +1,12 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonButton, IonButtons, IonCard, IonContent, IonHeader, IonTitle, IonToolbar, ModalController, IonCardHeader, IonCardContent, IonCardTitle, IonIcon, IonChip } from '@ionic/angular/standalone';
+import { IonButton, IonButtons, IonCard, IonContent, IonHeader, IonTitle, IonToolbar, ModalController, IonCardHeader, IonCardContent, IonCardTitle, IonIcon, IonChip,  IonAlert } from '@ionic/angular/standalone';
 import { VehiculoService } from 'src/app/services/vehiculo.service';
 import { OperadorService } from 'src/app/services/operador.service';
 import { PaymentTypeService } from 'src/app/services/payment-type.service';
 import { AuthService } from 'src/app/services/auth.service';
+import { DailyPaymentService } from 'src/app/services/daily-payment.service';
 
 @Component({
   selector: 'app-detalle',
@@ -13,7 +14,7 @@ import { AuthService } from 'src/app/services/auth.service';
   styleUrls: ['./detalle.page.scss'],
   standalone: true,
   imports: [IonIcon, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonButton, IonButtons, IonCard, IonCardHeader, IonCardContent, IonCardTitle, 
-    IonChip]
+    IonChip,  IonAlert]
 })
 export class DetallePage implements OnInit {
 
@@ -26,16 +27,39 @@ export class DetallePage implements OnInit {
   segundoChofer: any = null; // Nuevo campo para segundo chofer
   paymentTypes: any[] = [];
 
+  showAlert = false;
+  alertButtons: any[] = [];
+
+
   constructor(
     private modalController: ModalController,
     private vehiculoService: VehiculoService,
     private operadorService: OperadorService,
     private paymentTypeService: PaymentTypeService,
-    private authService: AuthService
+    private authService: AuthService,
+    private dailyPaymentService: DailyPaymentService
   ) { }
 
   ngOnInit(): void {
     this.user = this.authService.getUser();
+    
+    this.alertButtons = [
+      {
+        text: 'Cancelar',
+        role: 'cancel',
+        handler: () => {
+          this.showAlert = false;
+        }
+      },
+      {
+        text: 'Eliminar',
+        role: 'confirm',
+        handler: () => {
+          this.eliminarPago();
+        }
+      }
+    ];
+
 
     if (this.user != null) {
       // Cargar vehículo
@@ -79,6 +103,24 @@ export class DetallePage implements OnInit {
   getPaymentChipColor(index: number): string {
     const colors = ['primary', 'secondary', 'tertiary', 'success', 'warning', 'danger'];
     return colors[index % colors.length];
+  }
+
+  confirmarEliminacion() {
+    this.showAlert = true;
+  }
+
+  eliminarPago() {
+    if (!this.payment?.dailyPaymentId) return;
+
+    this.dailyPaymentService.eliminarPago(this.payment.dailyPaymentId).subscribe({
+      next: () => {
+        console.log('Pago eliminado:', this.payment);
+        this.modalController.dismiss({ eliminado: this.payment })
+      },
+      error: (err) => {
+        console.error('Error eliminando pago:', err);
+      }
+    });
   }
 
   cerrarModal() {
