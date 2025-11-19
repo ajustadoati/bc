@@ -29,8 +29,12 @@
             <p><strong>Kilómetros:</strong> {{ selectedExpense.kilometer || 'No especificado' }}</p>
           </ion-col>
           <ion-col size="6">
-            <p><strong>Monto:</strong> {{ selectedExpense.amount || 'No especificado' }}</p>
+            <p><strong>Monto en Bs:</strong> {{ selectedExpense.amount || 'No especificado' }}</p>
           </ion-col>
+                    <ion-col size="6">
+            <p><strong>Monto en dolares:</strong> {{ selectedExpense.amountDl || 'No especificado' }}</p>
+          </ion-col>
+
         </ion-row>
       </ion-grid>
     </ion-card-content>

@@ -44,6 +44,7 @@ export class CrearPage implements OnInit {
       description: [''],
       kilometer: [null],
       amount: [null],
+      amountDl: [null],
       labour: [null]
     });
 
