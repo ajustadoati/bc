@@ -57,6 +57,7 @@ export class DiarioPage implements OnInit {
       userSecondDriverId: [''],
       vehicleId: ['', Validators.required],
       dailyDate: [formatDate(new Date(), 'yyyy-MM-dd', 'en-US')],
+      description: ['', Validators.required],
       kilometerStart: [''],
       kilometerEnd: [''],
       dailyPaymentTypes: this.fb.array([

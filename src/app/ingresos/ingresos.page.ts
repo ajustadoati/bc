@@ -60,18 +60,36 @@ export class IngresosPage implements OnInit {
     }
   }
 
+  // cargarPagos() {
+  //   this.user = this.authService.getUser();
+
+  //   this.dailyPaymentService.obtenerPagosDiarios(this.user.id).subscribe({
+  //     next: (response) => {
+  //       this.dailyPayments = response;
+  //     },
+  //     error: (err) => {
+  //       console.error(err);
+  //     }
+  //   });
+  // }
+
   cargarPagos() {
     this.user = this.authService.getUser();
 
     this.dailyPaymentService.obtenerPagosDiarios(this.user.id).subscribe({
       next: (response) => {
-        this.dailyPayments = response;
+        // Ordenar por fecha descendente (más recientes primero)
+        this.dailyPayments = response.sort((a, b) => {
+          return new Date(b.dailyDate).getTime() - new Date(a.dailyDate).getTime();
+        });
       },
       error: (err) => {
         console.error(err);
       }
     });
   }
+
+
 
   cargarVehiculos() {
     this.user = this.authService.getUser();
