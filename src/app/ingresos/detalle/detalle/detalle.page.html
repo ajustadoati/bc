@@ -48,20 +48,10 @@
     </ion-card-content>
   </ion-card>
 
-  <ion-card class="compact-card">
-    <ion-card-header>
-      <ion-card-title class="small-title">Descripción</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <p>{{payment.description}}</p>
-    </ion-card-content>
-
-  </ion-card>
-
   <!-- Lista de pagos compacta -->
   <ion-card class="compact-card">
     <ion-card-header>
-      <ion-card-title class="small-title">Ingresos ({{ paymentTypes.length }} tipos)</ion-card-title>
+      <ion-card-title class="small-title">Ingresos </ion-card-title>
     </ion-card-header>
     <ion-card-content>
       <div class="payments-list">
@@ -77,6 +67,15 @@
           </div>
         </div>
       </div>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card class="compact-card">
+    <ion-card-header>
+      <ion-card-title class="small-title">Descripción</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>{{payment.description}}</p>
     </ion-card-content>
   </ion-card>
 
