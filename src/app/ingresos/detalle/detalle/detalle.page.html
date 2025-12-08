@@ -13,7 +13,7 @@
   <!-- Header compacto con fecha y total -->
   <div class="detail-header">
     <div class="date-section">
-      <h2>{{ payment.dailyDate | date:'dd/MM/yyyy' }}</h2>
+      <h2>{{ payment.dailyDate | date:'dd/MM/yyyy':'-04:00' }}</h2>
     </div>
     <div class="total-section">
       <span class="total-amount">{{ getTotal() | currency:'USD':'symbol':'1.0-0' }}</span>
