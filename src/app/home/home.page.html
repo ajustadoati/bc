@@ -1,51 +1,235 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Control de Vehículos</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="logout()">
-        <ion-icon slot="start" name="log-out-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content>
-  <ion-grid>
-    <ion-row>
-      <ion-col size="6">
-        <ion-button expand="block" routerLink="/ingresos" class="icon-button">
-          <ion-icon name="cash-outline" slot="start"></ion-icon>
-          <div>Ingresos</div>
-        </ion-button>
-      </ion-col>
-      <ion-col size="6">
-        <ion-button expand="block" routerLink="/gastos" class="icon-button">
-          <ion-icon name="card-outline"></ion-icon>
-          <div>Gastos</div>
-        </ion-button>
-      </ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col size="6">
-        <ion-button expand="block" routerLink="/vehiculos" class="icon-button">
-          <ion-icon name="car-sport-outline"></ion-icon>
-          <div>Vehículos</div>
-        </ion-button>
-      </ion-col>
-      <ion-col size="6">
-        <ion-button expand="block" routerLink="/operadores" class="icon-button">
-          <ion-icon name="people-outline"></ion-icon>
-          <div>Operadores</div>
-        </ion-button>
-      </ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col size="12">
-        <ion-button expand="block" routerLink="/set-up" class="icon-button">
-          <ion-icon name="settings-outline"></ion-icon>
-          <div>Configuración</div>
-        </ion-button>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+<ion-content class="desktop-content">
+  <div class="desktop-layout">
+    <aside class="sidebar" aria-label="Navegación principal">
+      <a routerLink="/home" class="brand">
+<span class="brand-mark">
+<ion-icon name="bus-outline" aria-hidden="true">
+</ion-icon>
+</span>
+<span>Bus<span class="brand-light">Control</span>
+<small>EL CAMINO, BAJO CONTROL</small>
+</span>
+</a>
+      <p class="nav-caption">MI ESPACIO</p>
+      <nav>
+<a class="nav-link active" routerLink="/home" aria-current="page">
+<ion-icon name="grid-outline" aria-hidden="true">
+</ion-icon>Mi escritorio<span class="active-dot">
+</span>
+</a>
+<a *ngFor="let module of modules" class="nav-link" [routerLink]="module.link">
+<ion-icon [name]="module.icon" aria-hidden="true">
+</ion-icon>{{ module.title }}</a>
+</nav>
+      <div class="sidebar-bottom">
+<div class="sidebar-note">
+<span class="note-icon">
+<ion-icon name="bus-outline" aria-hidden="true">
+</ion-icon>
+</span>
+<strong>Cada bus cuenta.</strong>
+<p>Un buen día empieza<br>con todo bajo control.</p>
+</div>
+<a class="nav-link" routerLink="/set-up">
+<ion-icon name="settings-outline" aria-hidden="true">
+</ion-icon>Configuración</a>
+<button class="nav-link logout" (click)="logout()">
+<ion-icon name="log-out-outline" aria-hidden="true">
+</ion-icon>Cerrar sesión</button>
+<span class="sidebar-footer">BUS CONTROL · TU DÍA A DÍA</span>
+</div>
+    </aside>
+    <main class="workspace">
+      <header class="topbar">
+<div>
+<span class="mobile-brand">Bus Control</span>
+<span class="breadcrumb">Mi espacio <span>/</span> <strong>Escritorio</strong>
+</span>
+</div>
+<div class="profile">
+<span class="profile-copy">
+<strong>{{ user?.firstName || 'Mi cuenta' }}</strong>
+<small>Mi espacio de gestión</small>
+</span>
+<span class="avatar" aria-hidden="true">{{ initials }}</span>
+<button class="mobile-logout" (click)="logout()" aria-label="Cerrar sesión">
+<ion-icon name="log-out-outline" aria-hidden="true">
+</ion-icon>
+</button>
+</div>
+</header>
+      <div class="page-content">
+        <div class="page-heading">
+<div>
+<p class="eyebrow">TU NEGOCIO, EN MARCHA</p>
+<h1>Mi escritorio</h1>
+<p>Hola{{ user?.firstName ? ', ' + user?.firstName : '' }}. Dale un buen comienzo a tu día.</p>
+</div>
+<span class="today">
+<ion-icon name="calendar-outline" aria-hidden="true">
+</ion-icon>{{ today }}</span>
+</div>
+        <section class="hero" aria-labelledby="hero-title">
+<div class="hero-copy">
+<span class="hero-tag">
+<span>
+</span>UN SOLO LUGAR PARA TU FLOTA</span>
+<h2 id="hero-title">Cada bus cuenta.<br>
+<span>Cada día también.</span>
+</h2>
+<p>Registra lo que entra, organiza lo que sale<br class="wide-break"> y mantén tu negocio en el camino.</p>
+<div class="hero-actions">
+<button class="primary-button" (click)="registerIncome()" [disabled]="!user || openingIncome">
+<ion-icon name="add-outline" aria-hidden="true">
+</ion-icon>{{ openingIncome ? 'Abriendo…' : 'Registrar ingreso' }}</button>
+<a class="secondary-button" routerLink="/gastos">Registrar gasto<ion-icon name="arrow-forward-outline" aria-hidden="true">
+</ion-icon>
+</a>
+</div>
+</div>
+<img src="assets/illustrations/bus-fleet.svg" alt="Bus de la flota en una ciudad" width="640" height="380" class="hero-art">
+</section>
+        <p *ngIf="actionError" class="load-notice" role="alert">{{ actionError }}</p>
+        <div *ngIf="loadError" class="load-notice" role="status">
+<span>Algunos datos no están disponibles. Puedes seguir usando los accesos.</span>
+<button (click)="loadDashboard()" [disabled]="loading">
+<ion-icon name="refresh-outline" aria-hidden="true">
+</ion-icon>Reintentar</button>
+</div>
+        <section class="stats" aria-label="Resumen de tu actividad" [attr.aria-busy]="loading">
+<a routerLink="/vehiculos" class="stat">
+<span class="module-icon blue">
+<ion-icon name="bus-outline" aria-hidden="true">
+</ion-icon>
+</span>
+<div>
+<span class="stat-label">Buses registrados</span>
+<strong>{{ loading ? '—' : (vehicles?.length ?? '—') }}</strong>
+<small>Tu flota en un lugar</small>
+</div>
+<ion-icon name="chevron-forward-outline" class="stat-arrow" aria-hidden="true">
+</ion-icon>
+</a>
+<a routerLink="/ingresos" class="stat">
+<span class="module-icon green">
+<ion-icon name="cash-outline" aria-hidden="true">
+</ion-icon>
+</span>
+<div>
+<span class="stat-label">Registros de ingresos</span>
+<strong>{{ loading ? '—' : (monthlyPayments ?? '—') }}</strong>
+<small>En {{ month }}</small>
+</div>
+<ion-icon name="chevron-forward-outline" class="stat-arrow" aria-hidden="true">
+</ion-icon>
+</a>
+<a routerLink="/operadores" class="stat">
+<span class="module-icon purple">
+<ion-icon name="people-outline" aria-hidden="true">
+</ion-icon>
+</span>
+<div>
+<span class="stat-label">Operadores registrados</span>
+<strong>{{ loading ? '—' : (operatorCount ?? '—') }}</strong>
+<small>Las personas de tu flota</small>
+</div>
+<ion-icon name="chevron-forward-outline" class="stat-arrow" aria-hidden="true">
+</ion-icon>
+</a>
+</section>
+        <div class="workspace-sections">
+<section aria-labelledby="shortcuts-title">
+<div class="section-heading">
+<div>
+<h2 id="shortcuts-title">Todo a mano</h2>
+<p>¿Qué quieres gestionar hoy?</p>
+</div>
+<span class="section-label">ACCESOS RÁPIDOS</span>
+</div>
+<div class="module-grid">
+<a *ngFor="let module of modules" [routerLink]="module.link" class="module-card">
+<span class="module-icon" [ngClass]="module.color">
+<ion-icon [name]="module.icon" aria-hidden="true">
+</ion-icon>
+</span>
+<h3>{{ module.title }}</h3>
+<p>{{ module.description }}</p>
+<span class="module-link">{{ module.label }}<ion-icon name="arrow-forward-outline" aria-hidden="true">
+</ion-icon>
+</span>
+</a>
+</div>
+</section>
+          <section class="fleet-panel" aria-labelledby="fleet-title">
+<div class="section-heading">
+<div>
+<h2 id="fleet-title">Tu flota</h2>
+<p>El corazón de tu negocio.</p>
+</div>
+<a routerLink="/vehiculos" aria-label="Ver todos los buses">
+<ion-icon name="arrow-forward-outline" aria-hidden="true">
+</ion-icon>
+</a>
+</div>
+<div *ngIf="loading" class="fleet-empty" role="status">
+<span class="module-icon blue">
+<ion-icon name="bus-outline" aria-hidden="true">
+</ion-icon>
+</span>
+<p>Cargando tus buses…</p>
+</div>
+<ng-container *ngIf="!loading">
+<a *ngFor="let bus of (vehicles || []).slice(0, 3)" routerLink="/vehiculos" class="bus-row">
+<span class="bus-icon">
+<ion-icon name="bus-outline" aria-hidden="true">
+</ion-icon>
+</span>
+<span>
+<strong>Unidad {{ bus.numberId }}</strong>
+<small>{{ bus.marca }} {{ bus.model }} · {{ bus.serial }}</small>
+</span>
+<ion-icon name="chevron-forward-outline" aria-hidden="true">
+</ion-icon>
+</a>
+<div *ngIf="!vehicles?.length" class="fleet-empty">
+<span class="module-icon blue">
+<ion-icon name="bus-outline" aria-hidden="true">
+</ion-icon>
+</span>
+<h3>{{ vehicles === null ? 'Tu flota, siempre cerca' : 'Tu próximo camino empieza aquí' }}</h3>
+<p>{{ vehicles === null ? 'Abre la sección de buses para consultar tus unidades.' : 'Agrega tu primer bus y empieza a organizar tu negocio.' }}</p>
+</div>
+</ng-container>
+<a routerLink="/vehiculos" class="fleet-button">{{ vehicles?.length ? 'Gestionar mis buses' : 'Ir a mis buses' }}<ion-icon name="arrow-forward-outline" aria-hidden="true">
+</ion-icon>
+</a>
+<div class="fleet-tip">
+<ion-icon name="checkmark-circle-outline" aria-hidden="true">
+</ion-icon>
+<p>Registra tus jornadas para mantener tu historial al día.</p>
+</div>
+</section>
+</div>
+        <footer class="workspace-footer">Hecho para quienes mantienen todo en movimiento.<span>Bus Control</span>
+</footer>
+      </div>
+    </main>
+  </div>
+  <nav class="mobile-nav" aria-label="Navegación principal móvil">
+<a routerLink="/home" aria-current="page">
+<ion-icon name="grid-outline" aria-hidden="true">
+</ion-icon>Inicio</a>
+<a routerLink="/vehiculos">
+<ion-icon name="bus-outline" aria-hidden="true">
+</ion-icon>Buses</a>
+<a routerLink="/ingresos">
+<ion-icon name="cash-outline" aria-hidden="true">
+</ion-icon>Ingresos</a>
+<a routerLink="/gastos">
+<ion-icon name="wallet-outline" aria-hidden="true">
+</ion-icon>Gastos</a>
+<a routerLink="/set-up">
+<ion-icon name="settings-outline" aria-hidden="true">
+</ion-icon>Ajustes</a>
+</nav>
 </ion-content>

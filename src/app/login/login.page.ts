@@ -1,40 +1,43 @@
-import { Component, OnInit } from '@angular/core';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonItem, IonLabel, IonButton, IonInput } from '@ionic/angular/standalone';
-import { Router } from '@angular/router';
-import { AuthService } from '../services/auth.service';
-import { FormsModule } from '@angular/forms';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
+import { FormsModule, NgForm } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
+import { IonContent, IonIcon } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { arrowForwardOutline, busOutline, eyeOutline, eyeOffOutline, checkmarkOutline, lockClosedOutline } from 'ionicons/icons';
+import { finalize } from 'rxjs';
+import { AuthService } from '../services/auth.service';
 @Component({
-  selector: 'app-login',
-  templateUrl: './login.page.html',
-  styleUrls: ['./login.page.scss'],
-  standalone: true,
-  imports: [IonItem, IonContent, IonHeader, IonTitle, IonToolbar, FormsModule, CommonModule, IonInput, IonItem, IonLabel, IonButton]
+    selector: 'app-login',
+    templateUrl: './login.page.html',
+    styleUrls: ['./login.page.scss'],
+    standalone: true,
+    imports: [CommonModule, FormsModule, IonContent, IonIcon, RouterModule]
 })
-export class LoginPage implements OnInit {
-
-  credentials = {
-    username: '12777981',
-    password: 'mySecurePassword123'
-  };
-  errorMessage = '';
-
-  constructor(private authService: AuthService, private router: Router) {}
-  ngOnInit(): void {
-    
-  }
-
-  login() {
-    
-    this.authService.login(this.credentials).subscribe({
-      next: () => {
-        this.router.navigate(['/home']); // Redirigir después del login
-      },
-      error: (err) => {
-        this.errorMessage = 'Credenciales incorrectas';
-        console.error(err);
-      }
-    });
-  }
+export class LoginPage {
+    credentials = { username: '', password: '' };
+    errorMessage = '';
+    isSubmitting = false;
+    showPassword = false;
+    constructor(private authService: AuthService, private router: Router) {
+        addIcons({ arrowForwardOutline, busOutline, eyeOutline, eyeOffOutline, checkmarkOutline, lockClosedOutline });
+    }
+    login(form: NgForm) {
+        if (this.isSubmitting)
+            return;
+        this.errorMessage = '';
+        if (form.invalid) {
+            form.control.markAllAsTouched();
+            return;
+        }
+        this.isSubmitting = true;
+        this.authService.login(this.credentials).pipe(finalize(() => this.isSubmitting = false)).subscribe({
+            next: () => this.router.navigate(['/home']),
+            error: (error) => {
+                this.errorMessage = error.status === 401 || error.status === 403
+                    ? 'El usuario o la contraseña no son correctos. Inténtalo de nuevo.'
+                    : 'No pudimos conectar con tu cuenta. Inténtalo de nuevo en unos momentos.';
+            }
+        });
+    }
 }

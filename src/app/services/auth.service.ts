@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, catchError, switchMap, tap, throwError } from 'rxjs';
 import jwt_decode, { jwtDecode } from 'jwt-decode';
 import { environment } from 'src/environments/environment';
 import { User } from '../interfaces/user';
@@ -24,16 +24,23 @@ export class AuthService {
   login(credentials: { username: string; password: string }): Observable<any> {
    
     return this.http.post<any>(`${this.apiUrl}/login`, credentials).pipe(
-      tap(response => {
-        if (response.token) {
-          
-          localStorage.setItem('token', response.token);
-          const user = this.decodeToken(response.token);
-          console.log("value token",user.sub);
-          localStorage.setItem('userId', user.sub); // Guarda el ID del usuario
-          this.loadUser(user.sub).subscribe(); // Carga el usuario en el BehaviorSubject
-          this.authState.next(true);
+      switchMap(response => {
+        const user = this.decodeToken(response.token);
+        if (!response.token || !user?.sub) {
+          return throwError(() => new Error('Respuesta de acceso inválida'));
         }
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('userId', user.sub);
+        return this.loadUser(user.sub).pipe(
+          tap(() => this.authState.next(true)),
+          catchError(error => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userId');
+            this.userSubject.next(null);
+            this.authState.next(false);
+            return throwError(() => error);
+          })
+        );
       })
     );
   }
@@ -41,6 +48,7 @@ export class AuthService {
   logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
+    this.userSubject.next(null);
     this.authState.next(false);
     this.router.navigate(['/login']);
   }
@@ -107,5 +115,3 @@ export class AuthService {
     return this.authState.asObservable();
   }
 }
-
-
