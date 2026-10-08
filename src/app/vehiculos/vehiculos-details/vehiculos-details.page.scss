@@ -1,0 +1,216 @@
+:host {
+  color-scheme: light;
+  --ion-text-color: #192e3b;
+  font-family: var(--bc-font);
+  color: #192e3b;
+}
+.detail-content {
+  --background: #f6f8fa;
+}
+.detail-header, .detail-footer {
+  background: #fff;
+  box-shadow: none;
+}
+.detail-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 23px 28px;
+  gap: 20px;
+  border-bottom: 1px solid #e5ece8;
+}
+.eyebrow {
+  font-size: 10px;
+  color: #6b8879;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+}
+h1 {
+  font-size: 24px;
+  font-weight: 750;
+  letter-spacing: -.6px;
+  margin: 8px 0 0;
+}
+button {
+  font: inherit;
+  border: 0;
+  cursor: pointer;
+}
+button:focus-visible {
+  outline: 3px solid #c5912f;
+  outline-offset: 3px;
+}
+.detail-toolbar button {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #f2f6f3;
+  color: #648174;
+  font-size: 23px;
+}
+.vehicle-detail {
+  padding: 23px 28px;
+}
+.identity-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  background: #eaf3ed;
+  border: 1px solid #d9e8dd;
+  border-radius: 12px;
+  padding: 24px;
+}
+.identity-panel > div {
+  min-width: 0;
+}
+.type-badge {
+  display: inline-block;
+  color: #537e66;
+  background: #fff8;
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 12px;
+}
+h2 {
+  font-size: 28px;
+  font-weight: 750;
+  letter-spacing: -.8px;
+  margin: 16px 0 8px;
+}
+.identity-panel p {
+  color: #698273;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 0 15px;
+  overflow-wrap: anywhere;
+}
+.plate {
+  display: inline-block;
+  background: #fcfefb;
+  border: 1px solid #cfdfd3;
+  border-radius: 7px;
+  padding: 9px 15px;
+  font-size: 14px;
+  letter-spacing: 1px;
+  color: #3e5c4f;
+  overflow-wrap: anywhere;
+}
+.identity-panel img {
+  width: 240px;
+  height: auto;
+  flex-shrink: 0;
+}
+.specifications {
+  background: #fff;
+  border: 1px solid #e4ebe7;
+  border-radius: 12px;
+  padding: 23px;
+  margin-top: 18px;
+}
+dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 23px;
+  margin: 0;
+}
+dl > div {
+  min-width: 0;
+}
+dt {
+  font-size: 12px;
+  color: #7c9083;
+  margin-bottom: 8px;
+}
+dd {
+  font-size: 14px;
+  color: #305246;
+  margin: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+}
+.company-field {
+  grid-column: 1 / -1;
+  padding-top: 18px;
+  border-top: 1px solid #edf1ef;
+}
+.detail-note {
+  color: #6f8678;
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 18px 0 0;
+}
+.footer-actions {
+  display: flex;
+  justify-content: end;
+  gap: 12px;
+  border-top: 1px solid #e5ece8;
+  padding: 17px 28px calc(17px + env(safe-area-inset-bottom));
+}
+.primary-button, .secondary-button {
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 8px;
+  padding: 12px 19px;
+  font-size: 13px;
+  font-weight: 650;
+}
+.primary-button {
+  background: #216b59;
+  color: #fff;
+}
+.secondary-button {
+  background: #eef6f0;
+  color: #39745a;
+}
+.empty-notice {
+  padding: 35px;
+  text-align: center;
+  color: #6f8678;
+  font-size: 14px;
+}
+@media (max-width: 640px) {
+  .detail-toolbar {
+    padding: 20px;
+  }
+  .vehicle-detail {
+    padding: 20px 16px;
+  }
+  .identity-panel {
+    position: relative;
+    overflow: hidden;
+    padding: 22px;
+  }
+  .identity-panel > div {
+    position: relative;
+    z-index: 1;
+  }
+  .identity-panel img {
+    position: absolute;
+    right: -45px;
+    bottom: 15px;
+    width: 190px;
+    opacity: .4;
+  }
+  h2 {
+    font-size: 25px;
+  }
+  .identity-panel p {
+    max-width: 210px;
+  }
+  .specifications {
+    padding: 20px;
+  }
+  .footer-actions {
+    padding-inline: 18px;
+  }
+  .primary-button, .secondary-button {
+    flex: 1;
+    padding-inline: 12px;
+  }
+}

@@ -96,7 +96,7 @@ export class HomePage implements OnDestroy {
         this.openingIncome = true;
         try {
             const { DiarioPage } = await import('../ingresos/diario/diario.page');
-            const modal = await this.modalController.create({ component: DiarioPage, componentProps: { userId: this.user.id } });
+            const modal = await this.modalController.create({ component: DiarioPage, cssClass: 'daily-income-modal', componentProps: { userId: this.user.id } });
             await modal.present();
             await modal.onDidDismiss();
             this.loadDashboard();

@@ -1,94 +1,62 @@
-<ion-header>
+<ion-header class="ion-no-border">
   <ion-toolbar>
-    <ion-title>Detalle de Pago</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="cerrarModal()">
-        <ion-icon slot="start" name="log-out-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
+    <div class="detail-heading">
+      <div><span class="eyebrow">LA JORNADA, EN CLARO</span><h1>Detalle del ingreso</h1></div>
+      <button class="close-button" type="button" aria-label="Cerrar detalle" [disabled]="busy" (click)="cerrarModal()"><ion-icon name="close-outline" aria-hidden="true"></ion-icon></button>
+    </div>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-  <!-- Header compacto con fecha y total -->
-  <div class="detail-header">
-    <div class="date-section">
-      <h2>{{ payment.dailyDate | date:'dd/MM/yyyy':'-04:00' }}</h2>
-    </div>
-    <div class="total-section">
-      <span class="total-amount">{{ getTotal() | currency:'USD':'symbol':'1.0-0' }}</span>
-    </div>
-  </div>
-
-  <!-- Información básica -->
-  <ion-card class="compact-card">
-    <ion-card-content>
-      <div class="info-grid">
-        <div class="info-item">
-          <ion-icon name="bus-outline"></ion-icon>
-          <span>Unidad {{ vehiculo?.numberId || 'N/A' }}</span>
-        </div>
-        <div class="info-item" *ngIf="payment.kilometerStart && payment.kilometerEnd">
-          <ion-icon name="speedometer-outline"></ion-icon>
-          <span>{{ payment.kilometerEnd - payment.kilometerStart }} km</span>
-        </div>
-        <div class="info-item">
-          <ion-icon name="person-outline"></ion-icon>
-          <span>{{ chofer?.firstName || 'Sin chofer' }}</span>
-        </div>
-        <div class="info-item" *ngIf="segundoChofer">
-          <ion-icon name="person-add-outline"></ion-icon>
-          <span>{{ segundoChofer?.firstName }} (2do)</span>
-        </div>
-        <div class="info-item" *ngIf="colector">
-          <ion-icon name="wallet-outline"></ion-icon>
-          <span>{{ colector?.firstName }} (Colector)</span>
-        </div>
+  <main class="detail-content" *ngIf="payment as income; else noPayment">
+    <section class="summary" aria-label="Resumen del ingreso">
+      <div class="journey">
+        <span class="record"><ion-icon name="receipt-outline" aria-hidden="true"></ion-icon> Registro #{{ income.dailyPaymentId }}</span>
+        <div class="vehicle"><span class="vehicle-icon"><ion-icon name="bus-outline" aria-hidden="true"></ion-icon></span><div><h2>Bus {{ vehicleLabel }}</h2><p *ngIf="vehiculo">{{ vehiculo.marca }} {{ vehiculo.model }}<span *ngIf="vehiculo.serial"> · {{ vehiculo.serial }}</span></p></div></div>
+        <p class="date"><ion-icon name="calendar-outline" aria-hidden="true"></ion-icon>{{ formatDate(income.dailyDate) }}</p>
       </div>
-    </ion-card-content>
-  </ion-card>
-
-  <!-- Lista de pagos compacta -->
-  <ion-card class="compact-card">
-    <ion-card-header>
-      <ion-card-title class="small-title">Ingresos </ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <div class="payments-list">
-        <div class="payment-item" *ngFor="let type of paymentTypes; let i = index">
-          <div class="payment-info">
-            <span class="payment-name">{{ type.paymentName }}</span>
-            <span class="payment-amount">{{ type.amount | currency:'USD':'symbol':'1.0-0' }}</span>
+      <div class="total"><span>Ingreso total de la jornada</span><strong>{{ total | currency:'USD':'symbol':'1.2-2' }}</strong><small>USD · {{ breakdown.length }} {{ breakdown.length === 1 ? 'tipo de pago' : 'tipos de pago' }}</small></div>
+    </section>
+    <p class="loading" role="status" *ngIf="loadingDetails">Cargando nombres del registro…</p>
+    <div class="catalog-warning" role="status" *ngIf="catalogWarning"><p>{{ catalogWarning }}</p><button type="button" (click)="loadDetails()" [disabled]="loadingDetails">Reintentar</button></div>
+    <div class="detail-grid">
+      <div class="column">
+        <section class="panel payments">
+          <div class="panel-heading"><span class="section-icon"><ion-icon name="wallet-outline" aria-hidden="true"></ion-icon></span><div><h2>Desglose de pagos</h2><p>Cómo se recibió el ingreso</p></div></div>
+          <div class="payment-row" *ngFor="let item of breakdown; let i = index; trackBy: trackRow">
+            <div class="payment-label"><span class="dot" [class.blue]="i % 2 === 1"></span><span>{{ item.label }}</span><strong>{{ item.amount | currency:'USD':'symbol':'1.2-2' }}</strong></div>
+            <div class="share-row"><div class="track" aria-hidden="true"><span [class.blue]="i % 2 === 1" [style.width.%]="share(item.amount, total) ?? 0"></span></div><span>{{ share(item.amount, total) === null ? '—' : (share(item.amount, total) | number:'1.0-1') + '%' }}</span></div>
           </div>
-          <div class="payment-percent">
-            <ion-chip [color]="getPaymentChipColor(i)" size="small">
-              {{ ((type.amount / getTotal()) * 100) | number:'1.0-0' }}%
-            </ion-chip>
-          </div>
-        </div>
+          <p class="empty-copy" *ngIf="!breakdown.length">Este registro no tiene pagos asociados.</p>
+          <div class="payment-total"><span>Total registrado</span><strong>{{ total | currency:'USD':'symbol':'1.2-2' }}</strong></div>
+        </section>
+        <section class="panel mileage" *ngIf="hasMileage">
+          <div class="panel-heading"><span class="section-icon blue-icon"><ion-icon name="speedometer-outline" aria-hidden="true"></ion-icon></span><div><h2>Recorrido de la jornada</h2><p>Lecturas del odómetro</p></div></div>
+          <div class="readings"><div><span>Inicio</span><strong>{{ income.kilometerStart == null ? '—' : (income.kilometerStart | number:'1.0-2') }}<small *ngIf="income.kilometerStart != null"> km</small></strong></div><span class="reading-line" aria-hidden="true"></span><div><span>Final</span><strong>{{ income.kilometerEnd == null ? '—' : (income.kilometerEnd | number:'1.0-2') }}<small *ngIf="income.kilometerEnd != null"> km</small></strong></div></div>
+          <div class="distance"><span>Distancia recorrida</span><strong>{{ distance === null ? 'No disponible' : (distance | number:'1.0-2') + ' km' }}</strong></div>
+          <p class="empty-copy" *ngIf="distance === null">Las lecturas están incompletas o el valor final es menor que el inicial.</p>
+        </section>
       </div>
-    </ion-card-content>
-  </ion-card>
-
-  <ion-card class="compact-card">
-    <ion-card-header>
-      <ion-card-title class="small-title">Descripción</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <p>{{payment.description}}</p>
-    </ion-card-content>
-  </ion-card>
-
-  <ion-button id="button-eliminar" (click)="confirmarEliminacion()">Eliminar Pago
-    <ion-icon slot="start" name="trash-outline"></ion-icon>
-  </ion-button>
-
+      <div class="column">
+        <section class="panel crew">
+          <div class="panel-heading"><span class="section-icon orange-icon"><ion-icon name="person-outline" aria-hidden="true"></ion-icon></span><div><h2>Equipo de la jornada</h2><p>Operadores asignados</p></div></div>
+          <div class="crew-member" *ngFor="let member of crew; trackBy: trackRow"><span class="avatar" aria-hidden="true"><ion-icon name="person-outline"></ion-icon></span><div><span>{{ member.role }}</span><strong>{{ member.name }}</strong></div></div>
+          <p class="empty-copy" *ngIf="!crew.length">Sin operadores asignados.</p>
+        </section>
+        <section class="panel notes">
+          <div class="panel-heading"><span class="section-icon blue-icon"><ion-icon name="document-text-outline" aria-hidden="true"></ion-icon></span><div><h2>Notas del ingreso</h2><p>Información adicional</p></div></div>
+          <p class="note-text" *ngIf="income.description?.trim(); else emptyNotes">{{ income.description }}</p>
+          <ng-template #emptyNotes><p class="empty-copy">Sin notas registradas.</p></ng-template>
+        </section>
+      </div>
+    </div>
+  </main>
+  <ng-template #noPayment><div class="empty-detail"><ion-icon name="receipt-outline" aria-hidden="true"></ion-icon><h2>Selecciona un ingreso</h2><p>Abre un registro del historial para consultar el detalle de su jornada.</p></div></ng-template>
 </ion-content>
 
-<ion-alert
-  [isOpen]="showAlert"
-  header="Confirmar eliminación"
-  message="¿Seguro que quieres eliminar este pago?"
-  [buttons]="alertButtons">
-</ion-alert>
-
+<ion-footer class="ion-no-border">
+  <div class="detail-footer">
+    <p class="delete-error" role="alert" *ngIf="deleteError">{{ deleteError }}</p>
+    <div class="footer-actions"><button class="delete-button" type="button" *ngIf="payment?.dailyPaymentId" [disabled]="busy" (click)="confirmarEliminacion()"><ion-icon name="trash-outline" aria-hidden="true"></ion-icon>{{ isDeleting ? 'Eliminando…' : 'Eliminar ingreso' }}</button><button class="back-button" type="button" [disabled]="busy" (click)="cerrarModal()">Volver al historial</button></div>
+  </div>
+</ion-footer>

@@ -1,146 +1,157 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonButtons, IonBackButton, IonIcon,  IonCard,  IonCardContent, ModalController } from '@ionic/angular/standalone';
+import { RouterModule } from '@angular/router';
+import { IonContent, IonIcon, ModalController } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { addOutline, arrowBackOutline, arrowForwardOutline, busOutline, cashOutline, calendarOutline, chevronBackOutline, chevronForwardOutline, closeOutline, receiptOutline, refreshOutline, searchOutline, speedometerOutline } from 'ionicons/icons';
+import { catchError, forkJoin, of, Subject, switchMap, takeUntil } from 'rxjs';
 import { DailyPaymentService } from '../services/daily-payment.service';
-import { DetallePage } from './detalle/detalle/detalle.page';
-import { AlertController } from '@ionic/angular';
-import { DiarioPage } from './diario/diario.page';
 import { AuthService } from '../services/auth.service';
 import { VehiculoService } from '../services/vehiculo.service';
+import { User } from '../interfaces/user';
+import { DetallePage } from './detalle/detalle/detalle.page';
+import { DiarioPage } from './diario/diario.page';
+import { DailyIncome, IncomeVehicle, formatOperatingDate, localDateKey, operatingDate, sumIncomeAmounts, traveledKilometers } from './income.models';
+
+type Period = 'today' | 'month' | 'all' | 'custom';
 
 @Component({
   selector: 'app-ingresos',
   templateUrl: './ingresos.page.html',
   styleUrls: ['./ingresos.page.scss'],
   standalone: true,
-  imports: [IonButton, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonButtons,
-    IonBackButton, IonIcon,  IonCard,
-    IonCardContent]
-  
+  imports: [CommonModule, FormsModule, RouterModule, IonContent, IonIcon]
 })
-export class IngresosPage implements OnInit {
-  operadoresFiltrados: any;
-  dailyPayments: any;
-  pagos: any;
-  user: any;
-  vehiculos: any[]=[];
-
-  eliminarOperador(_t29: any) {
-  throw new Error('Method not implemented.');
-  }
-  
+export class IngresosPage implements OnDestroy {
+  private readonly destroyed$ = new Subject<void>();
+  user: User | null = null;
+  dailyPayments: DailyIncome[] = [];
+  vehiculos: IncomeVehicle[] = [];
+  loading = true;
+  loadError = false;
+  vehicleError = false;
+  actionError = '';
+  successMessage = '';
+  openingModal = false;
+  search = '';
+  vehicleFilter = '';
+  period: Period = 'month';
+  fromDate = '';
+  toDate = localDateKey();
+  page = 1;
+  readonly pageSize = 12;
+  readonly formatDate = formatOperatingDate;
+  readonly getTotal = sumIncomeAmounts;
+  readonly kilometers = traveledKilometers;
 
   constructor(private dailyPaymentService: DailyPaymentService, private modalController: ModalController,
-    private alertController: AlertController, private authService: AuthService, private vehiculoService: VehiculoService) { }
-
-  ngOnInit() {
-    this.cargarPagos();
-    this.cargarVehiculos();
+    private authService: AuthService, private vehiculoService: VehiculoService) {
+    addIcons({ addOutline, arrowBackOutline, arrowForwardOutline, busOutline, cashOutline,
+      calendarOutline, chevronBackOutline, chevronForwardOutline, closeOutline, receiptOutline,
+      refreshOutline, searchOutline, speedometerOutline });
   }
 
-  getTotal(dailyPaymentTypes: any[]): number {
-    return dailyPaymentTypes.reduce((total, type) => total + type.amount, 0);
-  }
+  ionViewWillEnter() { this.loadPayments(); }
 
-  async abrirModalDetalle(payment: any) {
-    const modal = await this.modalController.create({
-      component: DetallePage,
-      componentProps: {
-        payment: payment
-      }
-    });
-    await modal.present();
- 
-    const { data } = await modal.onDidDismiss();
-
-    if (data?.eliminado) {
-      // Eliminar el pago de la lista local sin recargar
-      this.dailyPayments = this.dailyPayments.filter((p: { dailyPaymentId: any; }) => p.dailyPaymentId !== data.eliminado.dailyPaymentId);
-    }
-  }
-
-  // cargarPagos() {
-  //   this.user = this.authService.getUser();
-
-  //   this.dailyPaymentService.obtenerPagosDiarios(this.user.id).subscribe({
-  //     next: (response) => {
-  //       this.dailyPayments = response;
-  //     },
-  //     error: (err) => {
-  //       console.error(err);
-  //     }
-  //   });
-  // }
-
-  cargarPagos() {
-    this.user = this.authService.getUser();
-
-    this.dailyPaymentService.obtenerPagosDiarios(this.user.id).subscribe({
-      next: (response) => {
-        // Ordenar por fecha descendente (más recientes primero)
-        this.dailyPayments = response.sort((a, b) => {
-          return new Date(b.dailyDate).getTime() - new Date(a.dailyDate).getTime();
+  loadPayments() {
+    if (this.loading && this.user) return;
+    this.loading = true;
+    this.loadError = false;
+    this.vehicleError = false;
+    const storedUser = this.authService.getUser();
+    const profile$ = storedUser ? of(storedUser) : this.authService.loadUser(this.authService.getUserId());
+    profile$.pipe(
+      switchMap(user => {
+        this.user = user;
+        return forkJoin({
+          payments: this.dailyPaymentService.obtenerPagosDiarios(String(user.id)),
+          vehicles: this.vehiculoService.getVehiculos(String(user.id)).pipe(catchError(() => {
+            this.vehicleError = true;
+            return of([]);
+          }))
         });
+      }),
+      takeUntil(this.destroyed$)
+    ).subscribe({
+      next: ({ payments, vehicles }) => {
+        this.dailyPayments = payments.map(payment => ({ ...payment, dailyPaymentTypes: payment.dailyPaymentTypes || [] }))
+          .sort((a, b) => operatingDate(b.dailyDate).localeCompare(operatingDate(a.dailyDate)) || b.dailyPaymentId - a.dailyPaymentId);
+        this.vehiculos = vehicles;
+        this.loading = false;
+        this.page = 1;
       },
-      error: (err) => {
-        console.error(err);
-      }
+      error: () => { this.loading = false; this.loadError = true; }
     });
   }
 
+  get dateRangeError(): boolean { return this.period === 'custom' && !!this.fromDate && !!this.toDate && this.fromDate > this.toDate; }
 
-
-  cargarVehiculos() {
-    this.user = this.authService.getUser();
-
-    this.vehiculoService.getVehiculos(this.user.id).subscribe({
-      next: (response) => {
-        this.vehiculos = response;
-      },
-      error: (err) => {
-        console.error(err);
-      }
+  get filteredPayments(): DailyIncome[] {
+    const today = localDateKey();
+    const query = this.search.trim().toLocaleLowerCase('es');
+    if (this.dateRangeError) return [];
+    return this.dailyPayments.filter(payment => {
+      const day = operatingDate(payment.dailyDate);
+      const matchesDate = this.period === 'all'
+        || (this.period === 'today' && day === today)
+        || (this.period === 'month' && day.startsWith(today.slice(0, 7)))
+        || (this.period === 'custom' && (!this.fromDate || day >= this.fromDate) && (!this.toDate || day <= this.toDate));
+      const vehicle = this.vehiculos.find(item => item.id === payment.vehicleId);
+      const searchText = `${vehicle?.numberId || payment.vehicleId} ${vehicle?.serial || ''} ${payment.description || ''}`.toLocaleLowerCase('es');
+      return matchesDate && (!this.vehicleFilter || String(payment.vehicleId) === this.vehicleFilter) && (!query || searchText.includes(query));
     });
   }
 
-  getVehicleNumberId(vehicleId: any): string {
-    const vehiculo = this.vehiculos.find(v => v.id === vehicleId);
-    return vehiculo ? vehiculo.numberId : 'Desconocido';
+  get visiblePayments(): DailyIncome[] { return this.filteredPayments.slice((this.page - 1) * this.pageSize, this.page * this.pageSize); }
+  get pageCount(): number { return Math.max(1, Math.ceil(this.filteredPayments.length / this.pageSize)); }
+  get total(): number { return this.filteredPayments.reduce((cents, payment) => cents + Math.round(sumIncomeAmounts(payment.dailyPaymentTypes) * 100), 0) / 100; }
+  get activeVehicles(): number { return new Set(this.filteredPayments.map(payment => payment.vehicleId)).size; }
+  get periodLabel(): string {
+    return { today: 'Hoy', month: 'Este mes', all: 'Todo el historial', custom: 'Período personalizado' }[this.period];
   }
 
-  hasDriverInfo(payment: any): boolean {
-    return payment.userDriverId || payment.userSecondDriverId;
-  }
+  filtersChanged() { this.page = 1; }
+  clearFilters() { this.search = ''; this.vehicleFilter = ''; this.period = 'all'; this.fromDate = ''; this.toDate = localDateKey(); this.page = 1; }
+  vehicleLabel(id: number): string { return this.vehiculos.find(vehicle => vehicle.id === id)?.numberId || `#${id}`; }
+  trackPayment(_index: number, payment: DailyIncome) { return payment.dailyPaymentId; }
 
-  getDriversCount(payment: any): number {
-    let count = 0;
-    if (payment.userDriverId) count++;
-    if (payment.userSecondDriverId) count++;
-    return count;
-  }
-
-  async abrirModalAgregar(userId: any) {
-    const modal = await this.modalController.create({
-      component: DiarioPage,
-      componentProps: {
-        userId: this.user?.id
+  async abrirModalAgregar() {
+    if (!this.user || this.openingModal) return;
+    this.openingModal = true;
+    this.actionError = '';
+    this.successMessage = '';
+    try {
+      const modal = await this.modalController.create({ component: DiarioPage, cssClass: 'daily-income-modal',
+        componentProps: { userId: this.user.id } });
+      await modal.present();
+      const { role } = await modal.onDidDismiss();
+      if (role === 'saved') {
+        this.successMessage = 'Ingreso guardado correctamente.';
+        this.loadPayments();
       }
-    });
-  
-    await modal.present();
-  
-    const { role } = await modal.onWillDismiss();
-    
-    // Luego de cerrar el modal, actualizamos la lista
-    if (role !== 'refresh') {
-      this.cargarPagos();  // método que vuelve a cargar los datos
-    }
+    } catch {
+      this.actionError = 'No pudimos abrir el formulario. Inténtalo de nuevo.';
+    } finally { this.openingModal = false; }
   }
 
-  getLocalDate(dateString: string): Date {
-    const date = new Date(dateString);
-    return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+  async abrirModalDetalle(payment: DailyIncome) {
+    if (this.openingModal) return;
+    this.openingModal = true;
+    this.actionError = '';
+    try {
+      const modal = await this.modalController.create({ component: DetallePage, cssClass: 'income-detail-modal', componentProps: { payment } });
+      await modal.present();
+      const { data } = await modal.onDidDismiss();
+      if (data?.eliminado) {
+        this.dailyPayments = this.dailyPayments.filter(item => item.dailyPaymentId !== data.eliminado.dailyPaymentId);
+        this.page = Math.min(this.page, this.pageCount);
+        this.successMessage = 'Ingreso eliminado.';
+      }
+    } catch {
+      this.actionError = 'No pudimos abrir el detalle. Inténtalo de nuevo.';
+    } finally { this.openingModal = false; }
   }
 
+  ngOnDestroy() { this.destroyed$.next(); this.destroyed$.complete(); }
 }

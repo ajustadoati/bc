@@ -1,39 +1,178 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/home"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Vehículos</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="abrirModalAgregar()">
-        <ion-icon name="add-circle"></ion-icon> Agregar
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Vehículos</ion-title>
-    </ion-toolbar>
-  </ion-header>
-
-  <!-- Listado de vehículos -->
-  <ion-list>
-    <ion-item *ngFor="let vehiculo of vehiculos" (click)="openVehiculosDetails(vehiculo)">
-      <ion-label>
-        <h2>Unidad: {{ vehiculo.numberId }}</h2>
-        <p>{{ vehiculo.marca }} {{ vehiculo.model }}</p>
-        <p>Placa: {{ vehiculo.serial }}</p>
-      </ion-label>
-      <ion-button color="primary" (click)="abrirModalDetalle(vehiculo); $event.stopPropagation()">
-        <ion-icon name="create"></ion-icon> Editar
-      </ion-button>
-      <ion-button color="danger" (click)="eliminarVehiculo(vehiculo); $event.stopPropagation()">
-        <ion-icon name="trash"></ion-icon> Eliminar
-      </ion-button>
-    </ion-item>
-
-  </ion-list>
+<ion-content class="fleet-content">
+  <header class="fleet-topbar">
+    <a routerLink="/home" class="brand">
+      <span class="brand-mark">
+        <ion-icon name="bus-outline" aria-hidden="true">
+        </ion-icon>
+      </span>
+      <span>Bus<span class="brand-light">Control</span>
+      </span>
+    </a>
+    <a routerLink="/home" class="back-link">
+      <ion-icon name="arrow-back-outline" aria-hidden="true">
+      </ion-icon>Mi escritorio</a>
+  </header>
+  <main class="fleet-workspace">
+    <div class="page-heading">
+      <div>
+        <p class="eyebrow">TU NEGOCIO, SOBRE RUEDAS</p>
+        <h1>Mis buses</h1>
+        <p>Cada unidad de tu flota, en un mismo lugar.</p>
+      </div>
+      <button class="primary-button" (click)="abrirModalAgregar()" [disabled]="!user || loading || busy">
+        <ion-icon name="add-outline" aria-hidden="true">
+        </ion-icon>Registrar bus</button>
+    </div>
+    <section class="fleet-overview" aria-label="Resumen de la flota" [attr.aria-busy]="loading">
+      <div class="fleet-hero">
+        <div>
+          <span class="hero-tag">EL CORAZÓN DE TU NEGOCIO</span>
+          <strong>{{ loading || loadError ? '—' : vehiculos.length }} <span>{{ vehiculos.length === 1 ? 'bus registrado' : 'buses registrados' }}</span>
+          </strong>
+          <p>Tus unidades, listas para consultar<br>y mantener su información al día.</p>
+        </div>
+        <img src="assets/illustrations/bus-fleet.svg" alt="" width="640" height="380">
+      </div>
+      <div class="fleet-stats">
+        <div class="stat">
+          <span class="stat-icon blue">
+            <ion-icon name="pricetag-outline" aria-hidden="true">
+            </ion-icon>
+          </span>
+          <div>
+            <p>Marcas en tu flota</p>
+            <strong>{{ loading || loadError ? '—' : brandCount }}</strong>
+          </div>
+        </div>
+        <div class="stat">
+          <span class="stat-icon orange">
+            <ion-icon name="layers-outline" aria-hidden="true">
+            </ion-icon>
+          </span>
+          <div>
+            <p>Tipos de vehículo</p>
+            <strong>{{ loading || loadError ? '—' : typeCount }}</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="fleet-directory" aria-labelledby="fleet-title">
+      <div class="section-heading">
+        <div>
+          <h2 id="fleet-title">Tu flota</h2>
+          <p>Encuentra un bus por su unidad, placa, marca o empresa.</p>
+        </div>
+        <span class="result-badge" *ngIf="!loading && !loadError">{{ filteredVehicles.length }} {{ filteredVehicles.length === 1 ? 'unidad' : 'unidades' }}</span>
+      </div>
+      <div class="filters">
+        <div class="search-field">
+          <label for="fleet-search" class="visually-hidden">Buscar bus por unidad, placa, marca o empresa</label>
+          <ion-icon name="search-outline" aria-hidden="true">
+          </ion-icon>
+          <input id="fleet-search" type="search" [(ngModel)]="search" (ngModelChange)="filtersChanged()" placeholder="Buscar unidad, placa, marca…">
+        </div>
+        <div class="filter-field">
+          <label for="fleet-type">Tipo de vehículo</label>
+          <select id="fleet-type" [(ngModel)]="typeFilter" (ngModelChange)="filtersChanged()">
+            <option value="">Todos los tipos</option>
+            <option *ngFor="let type of availableTypes" [value]="type.id">{{ type.label }}</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <label for="fleet-order">Ordenar por</label>
+          <select id="fleet-order" [(ngModel)]="order" (ngModelChange)="filtersChanged()">
+            <option value="unit">Unidad: menor a mayor</option>
+            <option value="unit-desc">Unidad: mayor a menor</option>
+            <option value="brand">Marca</option>
+          </select>
+        </div>
+      </div>
+      <p *ngIf="actionError" class="notice error" role="alert">{{ actionError }}</p>
+      <p *ngIf="successMessage" class="notice success" role="status">{{ successMessage }}</p>
+      <p *ngIf="typeError && !loadError" class="notice" role="status">No pudimos cargar los nombres de los tipos de vehículo. Puedes seguir consultando tus buses.</p>
+      <div *ngIf="loading" class="empty-state" role="status">
+        <span class="empty-icon">
+          <ion-icon name="refresh-outline" aria-hidden="true">
+          </ion-icon>
+        </span>
+        <h3>Cargando tu flota…</h3>
+        <p>Estamos preparando las fichas de tus buses.</p>
+      </div>
+      <div *ngIf="!loading && loadError" class="empty-state" role="alert">
+        <span class="empty-icon">
+          <ion-icon name="bus-outline" aria-hidden="true">
+          </ion-icon>
+        </span>
+        <h3>No pudimos cargar tus buses</h3>
+        <p>Comprueba la conexión y vuelve a intentarlo.</p>
+        <button class="primary-button" (click)="loadVehicles()">
+          <ion-icon name="refresh-outline" aria-hidden="true">
+          </ion-icon>Reintentar</button>
+      </div>
+      <ng-container *ngIf="!loading && !loadError">
+        <div *ngIf="filteredVehicles.length" class="vehicle-grid">
+          <article *ngFor="let vehicle of visibleVehicles; trackBy: trackVehicle" class="vehicle-card">
+            <div class="vehicle-card-top">
+              <span class="bus-symbol">
+                <ion-icon name="bus-outline" aria-hidden="true">
+                </ion-icon>
+              </span>
+              <span class="type-badge">{{ typeLabel(vehicle.vehicleType) }}</span>
+            </div>
+            <h3>Unidad {{ vehicle.numberId }}</h3>
+            <p class="vehicle-model">{{ vehicle.marca }} {{ vehicle.model }}</p>
+            <div class="plate">
+              <span>PLACA</span>
+              <strong>{{ vehicle.serial || 'Sin placa' }}</strong>
+            </div>
+            <div class="company">
+              <span>EMPRESA</span>
+              <p>{{ vehicle.company || 'Sin empresa registrada' }}</p>
+            </div>
+            <div class="card-actions">
+              <button class="view-button" (click)="openVehiculosDetails(vehicle)" [disabled]="busy" [attr.aria-label]="'Ver ficha de la unidad ' + vehicle.numberId">Ver ficha<ion-icon name="arrow-forward-outline" aria-hidden="true">
+                </ion-icon>
+              </button>
+              <button class="edit-button" (click)="abrirModalDetalle(vehicle)" [disabled]="busy" [attr.aria-label]="'Editar unidad ' + vehicle.numberId">
+                <ion-icon name="create-outline" aria-hidden="true">
+                </ion-icon>Editar</button>
+              <button class="delete-button" (click)="eliminarVehiculo(vehicle)" [disabled]="busy" [attr.aria-label]="'Eliminar unidad ' + vehicle.numberId" [title]="'Eliminar unidad ' + vehicle.numberId">
+                <ion-icon name="trash-outline" aria-hidden="true">
+                </ion-icon>
+              </button>
+            </div>
+            <p *ngIf="deletingId === vehicle.id" class="deleting-status" role="status">Preparando la eliminación…</p>
+          </article>
+        </div>
+        <div *ngIf="filteredVehicles.length" class="list-footer">
+          <span>{{ filteredVehicles.length }} {{ filteredVehicles.length === 1 ? 'bus encontrado' : 'buses encontrados' }}</span>
+          <div *ngIf="pageCount > 1" class="pagination">
+            <button (click)="page = page - 1" [disabled]="page === 1" aria-label="Página anterior">
+              <ion-icon name="chevron-back-outline" aria-hidden="true">
+              </ion-icon>
+            </button>
+            <span aria-live="polite">{{ page }} de {{ pageCount }}</span>
+            <button (click)="page = page + 1" [disabled]="page === pageCount" aria-label="Página siguiente">
+              <ion-icon name="chevron-forward-outline" aria-hidden="true">
+              </ion-icon>
+            </button>
+          </div>
+        </div>
+        <div *ngIf="!filteredVehicles.length" class="empty-state">
+          <span class="empty-icon">
+            <ion-icon name="bus-outline" aria-hidden="true">
+            </ion-icon>
+          </span>
+          <h3>{{ vehiculos.length ? 'No encontramos buses con estos filtros' : 'Tu primer bus empieza aquí' }}</h3>
+          <p>{{ vehiculos.length ? 'Prueba otra unidad, placa o tipo de vehículo.' : 'Registra una unidad para empezar a organizar tu flota y sus jornadas.' }}</p>
+          <button *ngIf="vehiculos.length" class="secondary-button" (click)="clearFilters()">Limpiar filtros</button>
+          <button *ngIf="!vehiculos.length" class="primary-button" (click)="abrirModalAgregar()" [disabled]="!user || busy">
+            <ion-icon name="add-outline" aria-hidden="true">
+            </ion-icon>Registrar mi primer bus</button>
+        </div>
+      </ng-container>
+    </section>
+    <footer class="page-footer">Cada bus cuenta.<span>Bus Control · Tu flota, a mano.</span>
+    </footer>
+  </main>
 </ion-content>

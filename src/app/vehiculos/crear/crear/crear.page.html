@@ -1,58 +1,137 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>{{ vehiculoEditar ? 'Editar Vehículo' : 'Agregar Vehículo' }}</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="cerrar()">
-        <ion-icon slot="start" name="log-out-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
+<ion-header class="vehicle-form-header">
+  <div class="form-toolbar">
+    <div>
+      <span class="eyebrow">{{ vehiculoEditar ? 'LA INFORMACIÓN, AL DÍA' : 'TU FLOTA SIGUE CRECIENDO' }}</span>
+      <h1>{{ vehiculoEditar ? 'Editar bus' : 'Registrar bus' }}</h1>
+    </div>
+    <button type="button" (click)="cerrar()" [disabled]="isSaving" aria-label="Cerrar formulario">
+      <ion-icon name="close-outline" aria-hidden="true">
+      </ion-icon>
+    </button>
+  </div>
 </ion-header>
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Vehículos</ion-title>
-    </ion-toolbar>
-  </ion-header>
-
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Registro de Vehículos</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <form id="vehicle-form" (ngSubmit)="agregarVehiculo()">
-        <ion-item>
-          <ion-label>Tipo de Vehículo</ion-label>
-          <ion-select [(ngModel)]="nuevoVehiculo.vehicleType" name="tipo" required>
-            <ion-select-option *ngFor="let type of vehicleTypes" [value]="type.id">
-              {{ type.type }}
-            </ion-select-option>
-          </ion-select>
-        </ion-item>
-        <ion-item>
-          <ion-label position="floating">Unidad</ion-label>
-          <ion-input type="text" [(ngModel)]="nuevoVehiculo.numberId" name="numberId" required></ion-input>
-        </ion-item>
-        <ion-item>
-          <ion-label position="floating">Marca</ion-label>
-          <ion-input type="text" [(ngModel)]="nuevoVehiculo.marca" name="marca" required></ion-input>
-        </ion-item>
-        <ion-item>
-          <ion-label position="floating">Modelo</ion-label>
-          <ion-input type="text" [(ngModel)]="nuevoVehiculo.model" name="model" required></ion-input>
-        </ion-item>
-        <ion-item>
-          <ion-label position="floating">Placa</ion-label>
-          <ion-input type="text" [(ngModel)]="nuevoVehiculo.serial" name="serial" required></ion-input>
-        </ion-item>
-       
-        <ion-item>
-          <ion-label position="floating">Empresa</ion-label>
-          <ion-input type="text" [(ngModel)]="nuevoVehiculo.company" name="company" required></ion-input>
-        </ion-item>
-        <ion-button expand="full" type="submit">{{ vehiculoEditar ? 'Actualizar' : 'Registrar' }}</ion-button>
-      </form>
-    </ion-card-content>
-  </ion-card>
-
+<ion-content class="vehicle-form-content">
+  <div *ngIf="loading" class="form-state" role="status">
+    <ion-icon name="refresh-outline" aria-hidden="true">
+    </ion-icon>
+    <h2>Preparando la ficha…</h2>
+    <p>Estamos cargando los datos de tu flota.</p>
+  </div>
+  <div *ngIf="!loading && loadError" class="form-state" role="alert">
+    <h2>No pudimos cargar el formulario</h2>
+    <p>Comprueba la conexión y vuelve a intentarlo. Los datos que escribiste se conservan.</p>
+    <button class="primary-button" (click)="loadData()">Reintentar</button>
+  </div>
+  <form id="bus-registration-form" *ngIf="!loading && !loadError" [formGroup]="vehicleForm" (ngSubmit)="agregarVehiculo()" novalidate [attr.aria-busy]="isSaving">
+    <p *ngIf="!vehicleTypes.length" class="catalog-notice" role="status">No hay tipos de vehículo disponibles. Es necesario configurar al menos uno antes de registrar un bus.</p>
+    <div class="form-layout">
+      <fieldset [disabled]="isSaving">
+        <section class="form-section" aria-labelledby="identity-title">
+          <div class="section-title">
+            <span class="section-icon">
+              <ion-icon name="bus-outline" aria-hidden="true">
+              </ion-icon>
+            </span>
+            <div>
+              <h2 id="identity-title">Identifica tu unidad</h2>
+              <p>Los datos que te ayudarán a encontrarla cada día.</p>
+            </div>
+          </div>
+          <div class="field-grid">
+            <div class="field">
+              <label for="bus-number">Número de unidad <span>*</span>
+              </label>
+              <input id="bus-number" type="text" inputmode="numeric" formControlName="numberId" placeholder="Ej. 12" [attr.aria-invalid]="!!fieldError('numberId')" aria-describedby="bus-number-error">
+              <small id="bus-number-error" class="field-error" *ngIf="fieldError('numberId')">{{ fieldError('numberId') }}</small>
+            </div>
+            <div class="field">
+              <label for="bus-plate">Placa <span>*</span>
+              </label>
+              <input id="bus-plate" type="text" formControlName="serial" (blur)="normalizePlateField()" maxlength="255" placeholder="Ej. ABC-123" class="plate-input" autocapitalize="characters" spellcheck="false" [attr.aria-invalid]="!!fieldError('serial')" aria-describedby="bus-plate-error">
+              <small id="bus-plate-error" class="field-error" *ngIf="fieldError('serial')">{{ fieldError('serial') }}</small>
+            </div>
+          </div>
+          <div class="field full-field">
+            <label for="bus-type">Tipo de vehículo <span>*</span>
+            </label>
+            <select id="bus-type" formControlName="vehicleType" [attr.aria-invalid]="!!fieldError('vehicleType')" aria-describedby="bus-type-error">
+              <option [ngValue]="null" disabled>Selecciona un tipo</option>
+              <option *ngIf="unavailableCurrentType" [ngValue]="vehicleForm.get('vehicleType')?.value" disabled>Tipo actual no disponible · Elige otro</option>
+              <option *ngFor="let type of vehicleTypes" [ngValue]="type.id">{{ type.type }}</option>
+            </select>
+            <small id="bus-type-error" class="field-error" *ngIf="fieldError('vehicleType')">{{ fieldError('vehicleType') }}</small>
+          </div>
+        </section>
+        <section class="form-section" aria-labelledby="vehicle-data-title">
+          <div class="section-title">
+            <div>
+              <h2 id="vehicle-data-title">Completa su ficha</h2>
+              <p>Marca, modelo y empresa de la unidad.</p>
+            </div>
+          </div>
+          <div class="field-grid">
+            <div class="field">
+              <label for="bus-brand">Marca <span>*</span>
+              </label>
+              <input id="bus-brand" type="text" formControlName="marca" list="fleet-brand-suggestions" maxlength="255" placeholder="Ej. Mercedes-Benz" [attr.aria-invalid]="!!fieldError('marca')" aria-describedby="bus-brand-error">
+              <datalist id="fleet-brand-suggestions">
+                <option *ngFor="let brand of brands" [value]="brand">
+                </option>
+              </datalist>
+              <small id="bus-brand-error" class="field-error" *ngIf="fieldError('marca')">{{ fieldError('marca') }}</small>
+            </div>
+            <div class="field">
+              <label for="bus-model">Modelo <span>*</span>
+              </label>
+              <input id="bus-model" type="text" formControlName="model" maxlength="255" placeholder="Ej. OF 1721" [attr.aria-invalid]="!!fieldError('model')" aria-describedby="bus-model-error">
+              <small id="bus-model-error" class="field-error" *ngIf="fieldError('model')">{{ fieldError('model') }}</small>
+            </div>
+          </div>
+          <div class="field full-field">
+            <label for="bus-company">Empresa <span>*</span>
+            </label>
+            <input id="bus-company" type="text" formControlName="company" list="fleet-company-suggestions" maxlength="255" placeholder="Nombre de la empresa" [attr.aria-invalid]="!!fieldError('company')" aria-describedby="bus-company-error company-hint">
+            <datalist id="fleet-company-suggestions">
+              <option *ngFor="let company of companies" [value]="company">
+              </option>
+            </datalist>
+            <small id="company-hint" class="field-hint">La empresa que opera esta unidad.</small>
+            <small id="bus-company-error" class="field-error" *ngIf="fieldError('company')">{{ fieldError('company') }}</small>
+          </div>
+        </section>
+      </fieldset>
+      <aside class="preview-panel" aria-label="Vista previa de la ficha del bus">
+        <p class="preview-caption">ASÍ SE VERÁ TU FICHA</p>
+        <div class="preview-art">
+          <img src="assets/illustrations/bus-fleet.svg" alt="" width="640" height="380">
+        </div>
+        <span class="type-badge">{{ previewType }}</span>
+        <h2>{{ vehicleForm.get('numberId')?.value ? 'Unidad ' + vehicleForm.get('numberId')?.value : 'Nueva unidad' }}</h2>
+        <p class="preview-model">{{ vehicleForm.get('marca')?.value || 'Marca' }} {{ vehicleForm.get('model')?.value || 'y modelo' }}</p>
+        <strong class="preview-plate">{{ previewPlate }}</strong>
+        <p class="preview-company">{{ vehicleForm.get('company')?.value || 'Empresa por definir' }}</p>
+        <div class="preview-tip">
+          <ion-icon name="information-circle-outline" aria-hidden="true">
+          </ion-icon>
+          <p>Una ficha completa te ayuda a reconocer cada bus al registrar sus ingresos y gastos.</p>
+        </div>
+      </aside>
+    </div>
+    <p *ngIf="submitted && vehicleForm.invalid" class="validation-summary" role="alert">Hay campos por revisar. Corrige los mensajes indicados antes de guardar.</p>
+    <p *ngIf="saveError" class="save-error" role="alert">{{ saveError }}</p>
+    <p class="required-note">Los campos marcados con * son obligatorios.</p>
+  </form>
 </ion-content>
+<ion-footer class="vehicle-form-footer">
+  <div class="form-footer">
+    <p>
+      <ion-icon name="bus-outline" aria-hidden="true">
+      </ion-icon>{{ vehiculoEditar ? 'Mantén tu ficha al día' : 'Una nueva unidad para tu flota' }}</p>
+    <div class="footer-actions">
+      <button type="button" class="cancel-button" (click)="cerrar()" [disabled]="isSaving">Cancelar</button>
+      <button type="submit" form="bus-registration-form" class="primary-button" [disabled]="loading || loadError || !vehicleTypes.length || isSaving">
+        <ion-icon name="checkmark-outline" aria-hidden="true">
+        </ion-icon>{{ isSaving ? 'Guardando…' : vehiculoEditar ? 'Guardar cambios' : 'Registrar bus' }}</button>
+    </div>
+  </div>
+</ion-footer>

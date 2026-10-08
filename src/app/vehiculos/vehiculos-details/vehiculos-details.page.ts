@@ -1,29 +1,33 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { CommonModule } from '@angular/common'; 
-import { FormsModule } from '@angular/forms';
-import { IonButton, IonButtons, IonContent, IonHeader, IonTitle, IonToolbar, IonCard, IonCardContent, IonRow, IonGrid, IonCardHeader, 
-  IonCardTitle, IonCol, IonBackButton, IonIcon } from '@ionic/angular/standalone';
-import { ModalController } from '@ionic/angular';
-
+import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { IonContent, IonFooter, IonHeader, IonIcon, ModalController } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { closeOutline, createOutline, walletOutline } from 'ionicons/icons';
+import { FleetVehicle } from '../vehicle.models';
 
 @Component({
   selector: 'app-vehiculos-details',
   templateUrl: './vehiculos-details.page.html',
   styleUrls: ['./vehiculos-details.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonButton, IonButtons, IonContent, IonHeader, IonTitle, IonToolbar, IonCard, 
-    IonCardContent, IonRow, IonGrid, IonCardHeader, IonCardTitle, IonCol, IonIcon] 
+  imports: [CommonModule, IonContent, IonHeader, IonFooter, IonIcon]
 })
-export class VehiculosDetailsPage implements OnInit {
-  @Input() vehiculo: any;
-
-  constructor(private modalCtrl: ModalController) {}
-
-  ngOnInit() {
-    console.log('Vehículo recibido:', this.vehiculo);
+export class VehiculosDetailsPage {
+  @Input() vehiculo: FleetVehicle | null = null;
+  @Input() typeName = 'Sin clasificar';
+  constructor(private modalCtrl: ModalController, private router: Router) {
+    addIcons({ closeOutline, createOutline, walletOutline });
   }
-
-  cerrarModal() {
-    this.modalCtrl.dismiss();
+  async cerrarModal() {
+    const modal = await this.modalCtrl.getTop();
+    if (modal) await this.modalCtrl.dismiss(null, 'cancel');
+    else await this.router.navigate(['/vehiculos']);
+  }
+  editar() { this.modalCtrl.dismiss(null, 'edit'); }
+  async verGastos() {
+    if (!this.vehiculo) return;
+    await this.modalCtrl.dismiss(null, 'expenses');
+    await this.router.navigate(['/vehiculos', this.vehiculo.id, 'gastos']);
   }
 }

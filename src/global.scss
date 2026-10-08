@@ -35,3 +35,32 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+/* The daily income form uses a wider workspace while retaining Ionic's modal lifecycle. */
+.daily-income-modal {
+  --width: min(880px, calc(100vw - 40px));
+  --height: min(900px, calc(100dvh - 40px));
+  --border-radius: 18px;
+}
+.vehicle-editor-modal {
+  --width: min(960px, calc(100vw - 40px));
+  --height: min(810px, calc(100dvh - 40px));
+  --border-radius: 18px;
+}
+.vehicle-detail-modal {
+  --width: min(760px, calc(100vw - 40px));
+  --height: min(790px, calc(100dvh - 40px));
+  --border-radius: 18px;
+}
+.income-detail-modal {
+  --width: min(900px, calc(100vw - 40px));
+  --height: min(840px, calc(100dvh - 40px));
+  --border-radius: 18px;
+}
+@media (max-width: 640px) {
+  .daily-income-modal, .vehicle-editor-modal, .vehicle-detail-modal, .income-detail-modal {
+    --width: 100%;
+    --height: 100%;
+    --border-radius: 0;
+  }
+}

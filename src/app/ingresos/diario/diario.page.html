@@ -1,127 +1,235 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>Diario</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="cerrar()">
-        <ion-icon slot="start" name="log-out-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
+<ion-header class="income-form-header">
+  <div class="form-toolbar">
+    <div>
+      <span class="eyebrow">UNA JORNADA MÁS, BAJO CONTROL</span>
+      <h1>Registrar ingreso diario</h1>
+    </div>
+    <button type="button" (click)="cerrar()" [disabled]="isSaving" aria-label="Cerrar formulario">
+      <ion-icon name="close-outline" aria-hidden="true">
+      </ion-icon>
+    </button>
+  </div>
 </ion-header>
-
-<ion-content [fullscreen]="true">
-  <ion-card>
-    <ion-card-content align-items-center>
-      <form [formGroup]="dailyPaymentForm" (ngSubmit)="submitForm()">
-        <ion-item class="custom-item">
-          <ion-label>Chofer:</ion-label>
-          <ion-select formControlName="userDriverId">
-            <ion-select-option *ngFor="let user of conductors" [value]="user.id">
-              {{ user.firstName }}
-            </ion-select-option>
-          </ion-select>
-        </ion-item>
-
-        <ion-item class="custom-item">
-          <ion-label>¿Hay segundo chofer?</ion-label>
-          <ion-toggle (ionChange)="onSecondDriverToggle($event)"></ion-toggle>
-        </ion-item>
-
-        <ion-item *ngIf="hasSecondDriver" class="custom-item">
-          <ion-label>Segundo Chofer:</ion-label>
-          <ion-select formControlName="userSecondDriverId">
-            <ion-select-option *ngFor="let user of conductors" [value]="user.id">
-              {{ user.firstName }}
-            </ion-select-option>
-          </ion-select>
-        </ion-item>
-
-        <ion-item class="custom-item">
-          <ion-label>¿Hay colector?</ion-label>
-          <ion-toggle (ionChange)="onCollectorToggle($event)"></ion-toggle>
-        </ion-item>
-
-        <ion-item *ngIf="hasCollector" class="custom-item">
-          <ion-label>Colector:</ion-label>
-          <ion-select formControlName="userColectorId" (ionChange)="onColectorChange($event.detail.value)">
-            <ion-select-option *ngFor="let user of collectors" [value]="user.id">
-              {{ user.firstName }}
-            </ion-select-option>
-            <ion-select-option value="other">Otro</ion-select-option>
-          </ion-select>
-        </ion-item>
-
-        <ion-item *ngIf="hasCollector && isOtherColectorSelected" class="custom-item">
-          <ion-label position="stacked">Nombre del nuevo colector:</ion-label>
-          <ion-input formControlName="otherColectorName"></ion-input>
-        </ion-item>
-
-        <ion-item class="custom-item">
-          <ion-label>Unidad:</ion-label>
-          <ion-select formControlName="vehicleId">
-            <ion-select-option *ngFor="let vehicle of vehicles" [value]="vehicle.id">
-              {{ vehicle.numberId }}
-            </ion-select-option>
-          </ion-select>
-        </ion-item>
-
-        <ion-item class="custom-item">
-          <ion-label position="stacked">Fecha:</ion-label>
-          <ion-input type="date" formControlName="dailyDate"></ion-input>
-        </ion-item>
-
-        <ion-item class="custom-item">
-          <ion-label position="stacked">Km Inicio:</ion-label>
-          <ion-input type="number" formControlName="kilometerStart"></ion-input>
-        </ion-item>
-
-        <ion-item class="custom-item">
-          <ion-label position="stacked">Km Fin:</ion-label>
-          <ion-input type="number" formControlName="kilometerEnd"></ion-input>
-        </ion-item>
-
-        <ion-item class="custom-item">
-          <ion-label position="stacked">Descripción:</ion-label>
-          <ion-input formControlName="description"></ion-input>
-        </ion-item>
-        
-        <!-- Tabla de tipos de pago -->
-        <ion-list class="centered-list">
-          <ion-list-header>
-            <strong>Pagos</strong>
-          </ion-list-header>
-
-          <ion-grid>
-            <ion-row class="header-row" text-center>
-              <ion-col><strong>Tipo de Pago</strong></ion-col>
-              <ion-col><strong>Monto</strong></ion-col>
-            </ion-row>
-
-            <div formArrayName="dailyPaymentTypes">
-              <div *ngFor="let payment of dailyPaymentTypes.controls; let i = index" [formGroupName]="i">
-                <ion-row align-items-center>
-                  <ion-col>
-                    <ion-select formControlName="paymentTypeId" interface="popover">
-                      <ion-select-option *ngFor="let pt of paymentTypes" [value]="pt.paymentTypeId">
-                        {{ pt.paymentTypeName }}
-                      </ion-select-option>
-                    </ion-select>
-                  </ion-col>
-                  <ion-col>
-                    <ion-input type="number" formControlName="amount"></ion-input>
-                  </ion-col>
-                </ion-row>
-              </div>
-            </div>
-          </ion-grid>
-
-          <div class="center-button">
-            <ion-button size="small" fill="outline" (click)="addPaymentType()">+ Agregar Tipo de Pago</ion-button>
+<ion-content class="income-form-content">
+  <div *ngIf="loading" class="form-state" role="status">
+    <ion-icon name="refresh-outline" aria-hidden="true">
+    </ion-icon>
+    <h2>Preparando tu jornada…</h2>
+    <p>Estamos cargando tus buses y operadores.</p>
+  </div>
+  <div *ngIf="!loading && loadError" class="form-state" role="alert">
+    <h2>No pudimos cargar el formulario</h2>
+    <p>Tus datos permanecen en el formulario. Vuelve a intentarlo.</p>
+    <button class="primary-button" (click)="loadData()">Reintentar</button>
+  </div>
+  <form id="daily-income-form" *ngIf="!loading && !loadError" [formGroup]="dailyPaymentForm" (ngSubmit)="submitForm()" novalidate [attr.aria-busy]="isSaving">
+    <div class="catalog-notice" *ngIf="missingCatalogs" role="status">
+      <strong>Falta preparar tu flota</strong>
+      <p *ngIf="!vehicles.length">Agrega un bus desde «Mis buses» antes de registrar ingresos.</p>
+      <p *ngIf="!conductors.length">Agrega un conductor desde «Operadores» antes de registrar ingresos.</p>
+      <p *ngIf="!paymentTypes.length">No hay tipos de pago disponibles. Revisa su configuración.</p>
+    </div>
+    <fieldset [disabled]="isSaving">
+      <section class="form-section" aria-labelledby="journey-heading">
+        <div class="section-title">
+          <span class="section-icon">
+            <ion-icon name="bus-outline" aria-hidden="true">
+            </ion-icon>
+          </span>
+          <div>
+            <h2 id="journey-heading">La jornada</h2>
+            <p>Elige la unidad y el día que vas a registrar.</p>
           </div>
-        </ion-list>
-
-        <ion-button expand="full" type="submit" color="primary">Guardar</ion-button>
-      </form>
-    </ion-card-content>
-  </ion-card>
+          <span class="step">01</span>
+        </div>
+        <div class="field-grid">
+          <div class="field">
+            <label for="daily-vehicle">Bus <span>*</span>
+            </label>
+            <select id="daily-vehicle" formControlName="vehicleId" [attr.aria-invalid]="!!fieldError('vehicleId')" aria-describedby="vehicle-error">
+              <option [ngValue]="null" disabled>Selecciona una unidad</option>
+              <option *ngFor="let vehicle of vehicles" [ngValue]="vehicle.id">Unidad {{ vehicle.numberId }} · {{ vehicle.serial }}</option>
+            </select>
+            <small id="vehicle-error" class="field-error" *ngIf="fieldError('vehicleId')">{{ fieldError('vehicleId') }}</small>
+          </div>
+          <div class="field">
+            <label for="daily-date">Fecha <span>*</span>
+            </label>
+            <input id="daily-date" type="date" formControlName="dailyDate" [max]="today" [attr.aria-invalid]="!!fieldError('dailyDate')" aria-describedby="daily-date-error">
+            <small id="daily-date-error" class="field-error" *ngIf="fieldError('dailyDate')">{{ fieldError('dailyDate') }}</small>
+          </div>
+        </div>
+        <p *ngIf="duplicateDay" class="duplicate-notice" role="status">
+          <ion-icon name="alert-circle-outline" aria-hidden="true">
+          </ion-icon>Ya existe un ingreso para esta unidad y fecha. Comprueba que no sea el mismo registro.</p>
+      </section>
+      <section class="form-section" aria-labelledby="team-heading">
+        <div class="section-title">
+          <span class="section-icon blue">
+            <ion-icon name="people-outline" aria-hidden="true">
+            </ion-icon>
+          </span>
+          <div>
+            <h2 id="team-heading">Equipo de la jornada</h2>
+            <p>Selecciona al conductor y, si aplica, al resto del equipo.</p>
+          </div>
+          <span class="step">02</span>
+        </div>
+        <div class="field">
+          <label for="driver">Conductor principal <span>*</span>
+          </label>
+          <select id="driver" formControlName="userDriverId" [attr.aria-invalid]="!!fieldError('userDriverId')" aria-describedby="driver-error">
+            <option [ngValue]="null" disabled>Selecciona un conductor</option>
+            <option *ngFor="let driver of conductors" [ngValue]="driver.id">{{ driver.firstName }} {{ driver.lastName }} · {{ driver.numberId }}</option>
+          </select>
+          <small id="driver-error" class="field-error" *ngIf="fieldError('userDriverId')">{{ fieldError('userDriverId') }}</small>
+        </div>
+        <div class="team-options">
+          <label class="toggle-option">
+            <input type="checkbox" [checked]="hasSecondDriver" (change)="onSecondDriverToggle($any($event.target).checked)">
+            <span>Hay un segundo conductor</span>
+          </label>
+          <label class="toggle-option">
+            <input type="checkbox" [checked]="hasCollector" (change)="onCollectorToggle($any($event.target).checked)">
+            <span>Hay un colector</span>
+          </label>
+        </div>
+        <div class="field-grid" *ngIf="hasSecondDriver || hasCollector">
+          <div class="field" *ngIf="hasSecondDriver">
+            <label for="second-driver">Segundo conductor <span>*</span>
+            </label>
+            <select id="second-driver" formControlName="userSecondDriverId" [attr.aria-invalid]="!!fieldError('userSecondDriverId') || dailyPaymentForm.hasError('sameDriver')" aria-describedby="second-driver-error">
+              <option [ngValue]="null" disabled>Selecciona un conductor</option>
+              <option *ngFor="let driver of conductors" [ngValue]="driver.id" [disabled]="driver.id === dailyPaymentForm.get('userDriverId')?.value">{{ driver.firstName }} {{ driver.lastName }}</option>
+            </select>
+            <small id="second-driver-error" class="field-error" *ngIf="fieldError('userSecondDriverId') || dailyPaymentForm.hasError('sameDriver')">{{ dailyPaymentForm.hasError('sameDriver') ? 'El segundo conductor debe ser una persona diferente.' : fieldError('userSecondDriverId') }}</small>
+          </div>
+          <div class="field" *ngIf="hasCollector">
+            <label for="collector">Colector <span>*</span>
+            </label>
+            <select id="collector" formControlName="userColectorId" (change)="onColectorChange(dailyPaymentForm.get('userColectorId')?.value)" [attr.aria-invalid]="!!fieldError('userColectorId')" aria-describedby="collector-error">
+              <option [ngValue]="null" disabled>Selecciona un colector</option>
+              <option *ngFor="let collector of collectors" [ngValue]="collector.id">{{ collector.firstName }} {{ collector.lastName }}</option>
+              <option [ngValue]="'other'">Agregar un nuevo colector</option>
+            </select>
+            <small id="collector-error" class="field-error" *ngIf="fieldError('userColectorId')">{{ fieldError('userColectorId') }}</small>
+          </div>
+        </div>
+        <div *ngIf="isOtherColectorSelected" class="new-collector">
+          <p>El nuevo colector se añadirá a tus operadores al guardar.</p>
+          <div class="field-grid">
+            <div class="field">
+              <label for="collector-name">Nombre <span>*</span>
+              </label>
+              <input id="collector-name" formControlName="otherColectorName" [attr.aria-invalid]="!!fieldError('otherColectorName')" aria-describedby="collector-name-error">
+              <small id="collector-name-error" class="field-error" *ngIf="fieldError('otherColectorName')">{{ fieldError('otherColectorName') }}</small>
+            </div>
+            <div class="field">
+              <label for="collector-last-name">Apellido <span>*</span>
+              </label>
+              <input id="collector-last-name" formControlName="otherColectorLastName" [attr.aria-invalid]="!!fieldError('otherColectorLastName')" aria-describedby="collector-last-name-error">
+              <small id="collector-last-name-error" class="field-error" *ngIf="fieldError('otherColectorLastName')">{{ fieldError('otherColectorLastName') }}</small>
+            </div>
+            <div class="field">
+              <label for="collector-number">Cédula <span>*</span>
+              </label>
+              <input id="collector-number" formControlName="otherColectorNumberId" [attr.aria-invalid]="!!fieldError('otherColectorNumberId')" aria-describedby="collector-number-error">
+              <small id="collector-number-error" class="field-error" *ngIf="fieldError('otherColectorNumberId')">{{ fieldError('otherColectorNumberId') }}</small>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="form-section" aria-labelledby="payments-heading">
+        <div class="section-title">
+          <span class="section-icon orange">
+            <ion-icon name="cash-outline" aria-hidden="true">
+            </ion-icon>
+          </span>
+          <div>
+            <h2 id="payments-heading">Los ingresos del día</h2>
+            <p>Indica el tipo de pago y el importe en USD.</p>
+          </div>
+          <span class="step">03</span>
+        </div>
+        <div formArrayName="dailyPaymentTypes" class="payment-rows">
+          <div *ngFor="let payment of dailyPaymentTypes.controls; let i = index" [formGroupName]="i" class="payment-entry">
+            <span class="row-number">{{ i + 1 }}</span>
+            <div class="field">
+              <label [for]="'payment-type-' + i">Tipo de pago <span>*</span>
+              </label>
+              <select [id]="'payment-type-' + i" formControlName="paymentTypeId" [attr.aria-invalid]="!!controlError(payment.get('paymentTypeId'))" [attr.aria-describedby]="'payment-type-error-' + i">
+                <option [ngValue]="null" disabled>Selecciona un tipo</option>
+                <option *ngFor="let type of paymentTypes" [ngValue]="type.paymentTypeId">{{ type.paymentTypeName }}</option>
+              </select>
+              <small [id]="'payment-type-error-' + i" class="field-error" *ngIf="controlError(payment.get('paymentTypeId'))">{{ controlError(payment.get('paymentTypeId')) }}</small>
+            </div>
+            <div class="field amount-field">
+              <label [for]="'payment-amount-' + i">Importe USD <span>*</span>
+              </label>
+              <div class="money-input">
+                <span>$</span>
+                <input [id]="'payment-amount-' + i" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="0.00" formControlName="amount" [attr.aria-invalid]="!!controlError(payment.get('amount'))" [attr.aria-describedby]="'payment-amount-error-' + i">
+              </div>
+              <small [id]="'payment-amount-error-' + i" class="field-error" *ngIf="controlError(payment.get('amount'))">{{ controlError(payment.get('amount')) }}</small>
+            </div>
+            <button type="button" class="remove-payment" (click)="removePaymentType(i)" [disabled]="dailyPaymentTypes.length === 1 || isSaving" [attr.aria-label]="'Quitar pago ' + (i + 1)">
+              <ion-icon name="trash-outline" aria-hidden="true">
+              </ion-icon>
+            </button>
+          </div>
+        </div>
+        <button type="button" class="add-payment" (click)="addPaymentType()" [disabled]="isSaving">
+          <ion-icon name="add-outline" aria-hidden="true">
+          </ion-icon>Agregar otro tipo de pago</button>
+      </section>
+      <section class="form-section optional-section" aria-labelledby="extra-heading">
+        <div class="section-title">
+          <div>
+            <h2 id="extra-heading">Detalles adicionales</h2>
+            <p>Kilometraje y notas, si quieres completar la jornada.</p>
+          </div>
+          <span class="optional-badge">OPCIONAL</span>
+        </div>
+        <div class="field-grid">
+          <div class="field">
+            <label for="km-start">Kilómetros al salir</label>
+            <input id="km-start" type="number" min="0" step="1" inputmode="numeric" formControlName="kilometerStart" placeholder="Ej. 125000" [attr.aria-invalid]="!!fieldError('kilometerStart')" aria-describedby="km-start-error km-range-error">
+            <small id="km-start-error" class="field-error" *ngIf="fieldError('kilometerStart')">{{ fieldError('kilometerStart') }}</small>
+          </div>
+          <div class="field">
+            <label for="km-end">Kilómetros al regresar</label>
+            <input id="km-end" type="number" min="0" step="1" inputmode="numeric" formControlName="kilometerEnd" placeholder="Ej. 125180" [attr.aria-invalid]="!!fieldError('kilometerEnd') || dailyPaymentForm.hasError('kilometerOrder')" aria-describedby="km-end-error km-range-error">
+            <small id="km-end-error" class="field-error" *ngIf="fieldError('kilometerEnd')">{{ fieldError('kilometerEnd') }}</small>
+          </div>
+        </div>
+        <p id="km-range-error" class="field-error" *ngIf="dailyPaymentForm.hasError('kilometerOrder')">Los kilómetros al regresar deben ser iguales o mayores a los de salida.</p>
+        <p class="field-error" *ngIf="dailyPaymentForm.hasError('incompleteKilometers')">Completa ambos kilometrajes o deja los dos vacíos.</p>
+        <p *ngIf="kilometers !== null" class="distance-note">Recorrido de la jornada: <strong>{{ kilometers }} km</strong>
+        </p>
+        <div class="field notes-field">
+          <label for="daily-notes">Notas de la jornada</label>
+          <textarea id="daily-notes" formControlName="description" maxlength="500" rows="3" placeholder="Algún detalle que quieras recordar…" [attr.aria-invalid]="!!fieldError('description')" aria-describedby="notes-error">
+          </textarea>
+          <small id="notes-error" class="field-error" *ngIf="fieldError('description')">{{ fieldError('description') }}</small>
+        </div>
+      </section>
+    </fieldset>
+    <p *ngIf="submitted && dailyPaymentForm.invalid" class="validation-summary" role="alert">Hay campos por revisar. Corrige los mensajes indicados antes de guardar.</p>
+    <p *ngIf="saveError" class="save-error" role="alert">{{ saveError }}</p>
+    <p class="required-note">Los campos marcados con * son obligatorios.</p>
+  </form>
 </ion-content>
+<ion-footer class="income-form-footer">
+  <div class="form-footer">
+    <div class="live-total" role="status" aria-live="polite">
+      <small>Total de la jornada · USD</small>
+      <strong>{{ total | currency:'USD':'symbol':'1.2-2' }}</strong>
+    </div>
+    <div class="footer-actions">
+      <button type="button" class="cancel-button" (click)="cerrar()" [disabled]="isSaving">Cancelar</button>
+      <button type="submit" form="daily-income-form" class="primary-button" [disabled]="loading || loadError || missingCatalogs || isSaving">
+        <ion-icon name="checkmark-outline" aria-hidden="true">
+        </ion-icon>{{ isSaving ? 'Guardando…' : 'Guardar ingreso' }}</button>
+    </div>
+  </div>
+</ion-footer>

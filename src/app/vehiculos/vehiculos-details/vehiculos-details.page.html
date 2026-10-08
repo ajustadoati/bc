@@ -1,44 +1,61 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Detalles del veiculo </ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="cerrarModal()">
-        <ion-icon slot="start" name="log-out-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
+<ion-header class="detail-header">
+  <div class="detail-toolbar">
+    <div>
+      <span class="eyebrow">TU FLOTA, A MANO</span>
+      <h1>Ficha del bus</h1>
+    </div>
+    <button (click)="cerrarModal()" aria-label="Cerrar ficha">
+      <ion-icon name="close-outline" aria-hidden="true">
+      </ion-icon>
+    </button>
+  </div>
 </ion-header>
-
-<ion-content>
-  <ion-card *ngIf="vehiculo">
-    <ion-card-header>
-      <ion-card-title>Información</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-grid>
-        <ion-row>
-          <ion-col size="6">
-            <p><strong>Compañía:</strong> {{ vehiculo.company }}</p>
-          </ion-col>
-          <ion-col size="6">
-            <p><strong>Unidad:</strong> {{ vehiculo.numberId }}</p>
-          </ion-col>
-        </ion-row>
-        <ion-row>
-          <ion-col size="6">
-            <p><strong>Marca:</strong> {{ vehiculo.marca }}</p>
-          </ion-col>
-          <ion-col size="6">
-            <p><strong>Modelo:</strong> {{ vehiculo.model }}</p>
-          </ion-col>
-        </ion-row>
-        <ion-row>
-          <ion-col size="12">
-            <p><strong>Placa:</strong> {{ vehiculo.serial }}</p>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
-    </ion-card-content>
-  </ion-card>
+<ion-content class="detail-content">
+  <div *ngIf="vehiculo as vehicle" class="vehicle-detail">
+    <div class="identity-panel">
+      <div>
+        <span class="type-badge">{{ typeName }}</span>
+        <h2>Unidad {{ vehicle.numberId }}</h2>
+        <p>{{ vehicle.marca }} {{ vehicle.model }}</p>
+        <strong class="plate">{{ vehicle.serial || 'Sin placa' }}</strong>
+      </div>
+      <img src="assets/illustrations/bus-fleet.svg" alt="" width="640" height="380">
+    </div>
+    <section class="specifications" aria-label="Información del bus">
+      <dl>
+        <div>
+          <dt>Marca</dt>
+          <dd>{{ vehicle.marca || 'Sin registrar' }}</dd>
+        </div>
+        <div>
+          <dt>Modelo</dt>
+          <dd>{{ vehicle.model || 'Sin registrar' }}</dd>
+        </div>
+        <div>
+          <dt>Tipo de vehículo</dt>
+          <dd>{{ typeName }}</dd>
+        </div>
+        <div>
+          <dt>Placa</dt>
+          <dd>{{ vehicle.serial || 'Sin registrar' }}</dd>
+        </div>
+        <div class="company-field">
+          <dt>Empresa</dt>
+          <dd>{{ vehicle.company || 'Sin registrar' }}</dd>
+        </div>
+      </dl>
+    </section>
+    <p class="detail-note">Consulta los gastos de esta unidad o actualiza su información cuando lo necesites.</p>
+  </div>
+  <p *ngIf="!vehiculo" class="empty-notice" role="status">No hay información de una unidad para mostrar.</p>
 </ion-content>
-
+<ion-footer *ngIf="vehiculo" class="detail-footer">
+  <div class="footer-actions">
+    <button class="secondary-button" (click)="verGastos()">
+      <ion-icon name="wallet-outline" aria-hidden="true">
+      </ion-icon>Ver gastos</button>
+    <button class="primary-button" (click)="editar()">
+      <ion-icon name="create-outline" aria-hidden="true">
+      </ion-icon>Editar bus</button>
+  </div>
+</ion-footer>

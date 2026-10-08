@@ -1,223 +1,225 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { CommonModule, formatDate } from '@angular/common';
-import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { IonButton, IonGrid, IonRow, IonCard, IonCardContent, IonContent, IonHeader, IonItem, IonLabel, IonList, IonListHeader, IonSelectOption, IonTitle, IonToolbar, IonButtons, IonModal, IonDatetime, IonDatetimeButton, IonSelect, IonInput, IonCol, IonIcon, IonToggle } from '@ionic/angular/standalone';
-import { PaymentTypeService } from 'src/app/services/payment-type.service';
-import { UserService } from 'src/app/services/user.service';
-import { VehiculoService } from 'src/app/services/vehiculo.service';
-import { ModalController } from '@ionic/angular';
-import { AuthService } from 'src/app/services/auth.service';
-import { DailyPaymentService } from 'src/app/services/daily-payment.service';
-import { AlertController } from '@ionic/angular/standalone';
-import { OperadorService } from 'src/app/services/operador.service';
-import { firstValueFrom } from 'rxjs';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { IonContent, IonHeader, IonFooter, IonIcon, ModalController } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { addOutline, busOutline, cashOutline, checkmarkOutline, closeOutline, peopleOutline, refreshOutline, trashOutline, alertCircleOutline } from 'ionicons/icons';
+import { catchError, firstValueFrom, forkJoin, of, Subject, switchMap, takeUntil } from 'rxjs';
+import { AuthService } from '../../services/auth.service';
+import { VehiculoService } from '../../services/vehiculo.service';
+import { PaymentTypeService } from '../../services/payment-type.service';
+import { UserService } from '../../services/user.service';
+import { DailyPaymentService } from '../../services/daily-payment.service';
+import { OperadorService } from '../../services/operador.service';
+import { User } from '../../interfaces/user';
+import { DailyIncome, IncomeOperator, IncomePaymentType, IncomeVehicle, localDateKey, operatingDate, sumIncomeAmounts, traveledKilometers } from '../income.models';
+import { jornadaValidator, moneyPrecision, validOperatingDate } from '../income.validators';
 
 @Component({
   selector: 'app-diario',
   templateUrl: './diario.page.html',
   styleUrls: ['./diario.page.scss'],
   standalone: true,
-  imports: [IonIcon, IonCol, IonButtons, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonItem, IonLabel, 
-    IonCard, IonCardContent, IonSelectOption, IonList, IonListHeader, IonButton, ReactiveFormsModule,
-    IonButton, IonButtons,IonSelect, IonInput, IonGrid, IonRow, IonToggle
-  ]
+  imports: [CommonModule, ReactiveFormsModule, IonContent, IonHeader, IonFooter, IonIcon]
 })
-export class DiarioPage implements OnInit {
-
-  dailyPaymentForm: FormGroup;
-  users: any[] = [];
-  vehicles: any[] = [];
-  paymentTypes: any[] = [];
-  @Input() payment: any;
-  @Input() userId: any;
-  user: any;
-  date!: Date;
-  conductors: any[] = [];
-  collectors:any[] = [];
-  isOtherColectorSelected = false;
+export class DiarioPage implements OnInit, OnDestroy {
+  @Input() userId?: number;
+  private readonly destroyed$ = new Subject<void>();
+  user: User | null = null;
+  vehicles: IncomeVehicle[] = [];
+  paymentTypes: IncomePaymentType[] = [];
+  conductors: IncomeOperator[] = [];
+  collectors: IncomeOperator[] = [];
+  existingPayments: DailyIncome[] = [];
+  loading = true;
+  loadError = false;
+  isSaving = false;
+  submitted = false;
+  saveError = '';
   hasSecondDriver = false;
   hasCollector = false;
+  isOtherColectorSelected = false;
+  readonly today = localDateKey();
+  readonly dailyPaymentForm: FormGroup;
 
-  constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private vehiculoService: VehiculoService,
-    private paymentTypeService: PaymentTypeService,
-    private modalCtrl: ModalController,
-    private userService: UserService,
-    private dailyPaymentService: DailyPaymentService,
-    private alertController: AlertController,
-    private operadorService: OperadorService
-  ) {
+  constructor(private fb: FormBuilder, private authService: AuthService,
+    private vehiculoService: VehiculoService, private paymentTypeService: PaymentTypeService,
+    private modalCtrl: ModalController, private userService: UserService,
+    private dailyPaymentService: DailyPaymentService, private operadorService: OperadorService) {
+    addIcons({ addOutline, busOutline, cashOutline, checkmarkOutline, closeOutline,
+      peopleOutline, refreshOutline, trashOutline, alertCircleOutline });
     this.dailyPaymentForm = this.fb.group({
-      userId: [''],
-      userColectorId: [''],
+      vehicleId: [null, Validators.required],
+      dailyDate: [this.today, [Validators.required, validOperatingDate]],
+      userDriverId: [null, Validators.required],
+      userSecondDriverId: [null],
+      userColectorId: [null],
       otherColectorName: [''],
-      userDriverId: ['', Validators.required],
-      userSecondDriverId: [''],
-      vehicleId: ['', Validators.required],
-      dailyDate: [formatDate(new Date(), 'yyyy-MM-dd', 'en-US')],
-      description: ['', Validators.required],
-      kilometerStart: [''],
-      kilometerEnd: [''],
-      dailyPaymentTypes: this.fb.array([
-        this.fb.group({
-          paymentTypeId: ['', Validators.required],
-          amount: [Validators.required, Validators.min(0.01)]
-        })
-      ])
-    });
+      otherColectorLastName: [''],
+      otherColectorNumberId: [''],
+      description: ['', Validators.maxLength(500)],
+      kilometerStart: [null, [Validators.min(0), Validators.pattern(/^\d+$/)]],
+      kilometerEnd: [null, [Validators.min(0), Validators.pattern(/^\d+$/)]],
+      dailyPaymentTypes: this.fb.array([this.createPaymentRow()])
+    }, { validators: jornadaValidator });
   }
 
-  ngOnInit() {
-    if (this.userId == null) {
-      this.user = this.authService.getUser();
-      this.userId = this.user.id;
-    }
+  ngOnInit() { this.loadData(); }
 
-    this.vehiculoService.getVehiculos(this.userId).subscribe({
-      next: (response) => {
-        console.log(response);
-        this.vehicles = response;
+  async ionViewDidEnter() {
+    const modal = await this.modalCtrl.getTop();
+    if (modal) modal.canDismiss = async (_data, role) => !this.isSaving || role === 'saved';
+  }
+
+  loadData() {
+    this.loading = true;
+    this.loadError = false;
+    const storedUser = this.authService.getUser();
+    const profile$ = storedUser ? of(storedUser) : this.authService.loadUser(this.authService.getUserId());
+    profile$.pipe(
+      switchMap(user => {
+        this.user = user;
+        this.userId = user.id;
+        return forkJoin({
+          vehicles: this.vehiculoService.getVehiculos(String(user.id)),
+          paymentTypes: this.paymentTypeService.getPaymentTypes(),
+          operators: this.userService.getUsers(user.id),
+          payments: this.dailyPaymentService.obtenerPagosDiarios(String(user.id)).pipe(catchError(() => of([])))
+        });
+      }),
+      takeUntil(this.destroyed$)
+    ).subscribe({
+      next: data => {
+        this.vehicles = data.vehicles;
+        this.paymentTypes = data.paymentTypes;
+        this.conductors = data.operators.filter(operator => operator.type === 'CONDUCTOR');
+        this.collectors = data.operators.filter(operator => operator.type === 'COLECTOR');
+        this.existingPayments = data.payments;
+        if (this.vehicles.length === 1 && !this.dailyPaymentForm.get('vehicleId')?.value) this.dailyPaymentForm.patchValue({ vehicleId: this.vehicles[0].id });
+        if (this.paymentTypes.length === 1) {
+          this.dailyPaymentTypes.controls.forEach(row => {
+            if (!row.get('paymentTypeId')?.value) row.patchValue({ paymentTypeId: this.paymentTypes[0].paymentTypeId });
+          });
+        }
+        this.loading = false;
       },
-      error: (err) => {
-        console.error(err);
-      }
+      error: () => { this.loading = false; this.loadError = true; }
     });
- 
-    this.paymentTypeService.getPaymentTypes().subscribe({
-      next: (response) => {
-        console.log(response);
-        this.paymentTypes = response;
-      },
-      error: (err) => {
-        console.error(err);
-      }
+  }
+
+  private createPaymentRow(): FormGroup {
+    return this.fb.group({
+      paymentTypeId: [null, Validators.required],
+      amount: [null, [Validators.required, Validators.min(0.01), moneyPrecision]]
     });
-
-    this.userService.getUsers(this.userId).subscribe({
-  
-      next: (response) => {
-        console.log(response);
-        this.users = response;
-        this.conductors = this.users.filter(user => user.type === 'CONDUCTOR');
-        this.collectors = this.users.filter(user => user.type === 'COLECTOR');
-      },
-      error: (err) => {
-        console.error(err);
-      }
-    });
-
   }
 
-  onColectorChange(value: string) {
-    this.isOtherColectorSelected = value === 'other';
-    if (this.isOtherColectorSelected) {
-      this.dailyPaymentForm.get('otherColectorName')?.setValidators([Validators.required]);
-    } else {
-      this.dailyPaymentForm.get('otherColectorName')?.clearValidators();
-      this.dailyPaymentForm.get('otherColectorName')?.setValue('');
-    }
-    this.dailyPaymentForm.get('otherColectorName')?.updateValueAndValidity();
+  get dailyPaymentTypes(): FormArray { return this.dailyPaymentForm.get('dailyPaymentTypes') as FormArray; }
+  get total(): number { return sumIncomeAmounts(this.dailyPaymentTypes.value); }
+  get kilometers(): number | null {
+    const { kilometerStart, kilometerEnd } = this.dailyPaymentForm.value;
+    return traveledKilometers(kilometerStart, kilometerEnd);
+  }
+  get missingCatalogs(): boolean { return !this.vehicles.length || !this.conductors.length || !this.paymentTypes.length; }
+  get duplicateDay(): boolean {
+    const { vehicleId, dailyDate } = this.dailyPaymentForm.value;
+    return this.existingPayments.some(payment => payment.vehicleId === vehicleId && operatingDate(payment.dailyDate) === dailyDate);
   }
 
-  onCollectorToggle(event: any) {
-    this.hasCollector = event.detail.checked;
-    if (this.hasCollector) {
-      this.dailyPaymentForm.get('userColectorId')?.setValidators([Validators.required]);
-    } else {
-      this.dailyPaymentForm.get('userColectorId')?.clearValidators();
-      this.dailyPaymentForm.get('userColectorId')?.setValue('');
-      this.dailyPaymentForm.get('otherColectorName')?.setValue('');
-      this.isOtherColectorSelected = false;
-    }
-    this.dailyPaymentForm.get('userColectorId')?.updateValueAndValidity();
+  fieldError(name: string): string {
+    const control = this.dailyPaymentForm.get(name);
+    if (name.startsWith('otherColector') && control?.hasError('pattern') && (control.touched || this.submitted)) return 'Escribe un valor que no contenga solo espacios.';
+    return this.controlError(control);
   }
-
-  onSecondDriverToggle(event: any) {
-    this.hasSecondDriver = event.detail.checked;
-    if (this.hasSecondDriver) {
-      this.dailyPaymentForm.get('userSecondDriverId')?.setValidators([Validators.required]);
-    } else {
-      this.dailyPaymentForm.get('userSecondDriverId')?.clearValidators();
-      this.dailyPaymentForm.get('userSecondDriverId')?.setValue('');
-    }
-    this.dailyPaymentForm.get('userSecondDriverId')?.updateValueAndValidity();
-  }
-
-  get dailyPaymentTypes(): FormArray {
-    return this.dailyPaymentForm.get('dailyPaymentTypes') as FormArray;
+  controlError(control: AbstractControl | null): string {
+    if (!control || (!control.touched && !this.submitted) || !control.errors) return '';
+    if (control.hasError('required')) return 'Completa este campo.';
+    if (control.hasError('futureDate')) return 'La jornada no puede tener una fecha futura.';
+    if (control.hasError('invalidDate')) return 'Selecciona una fecha válida.';
+    if (control.hasError('moneyPrecision')) return 'Usa un importe válido con un máximo de dos decimales.';
+    if (control.hasError('maxlength')) return 'Usa un máximo de 500 caracteres.';
+    if (control.hasError('pattern')) return 'Usa un número entero de kilómetros.';
+    if (control.hasError('min')) return 'El importe debe ser mayor que cero; los kilómetros no pueden ser negativos.';
+    return 'Revisa este campo.';
   }
 
   addPaymentType() {
-    this.dailyPaymentTypes.push(this.fb.group({
-      paymentTypeId: [''],
-      amount: ['']
-    }));
+    if (this.isSaving) return;
+    const row = this.createPaymentRow();
+    if (this.paymentTypes.length === 1) row.patchValue({ paymentTypeId: this.paymentTypes[0].paymentTypeId });
+    this.dailyPaymentTypes.push(row);
   }
 
-
-
-async submitForm() {
-  if (this.dailyPaymentForm.invalid) {
-    await this.showAlert('Formulario incompleto', 'Por favor, completa todos los campos obligatorios.');
-    return;
+  removePaymentType(index: number) {
+    if (!this.isSaving && this.dailyPaymentTypes.length > 1) this.dailyPaymentTypes.removeAt(index);
   }
 
-  const formValue = this.dailyPaymentForm.value;
+  onSecondDriverToggle(enabled: boolean) {
+    this.hasSecondDriver = enabled;
+    const control = this.dailyPaymentForm.get('userSecondDriverId')!;
+    control.setValidators(enabled ? [Validators.required] : []);
+    if (!enabled) control.reset(null);
+    control.updateValueAndValidity();
+  }
 
-  try {
-    // Si hay colector y se selecciona "Otro", creamos primero al colector
-    if (this.hasCollector && formValue.userColectorId === 'other') {
-      const newColector = {
-        firstName: formValue.otherColectorName,
-        lastName: 'Colector',
-        numberId: '1-' + formValue.otherColectorName,
-        rol: 'COLECTOR',
-        companyId: this.userId
-      };
-
-      const response = await firstValueFrom(this.operadorService.agregarOperador(newColector));
-      console.log('Usuario agregado correctamente', response.id);
-
-      this.dailyPaymentForm.patchValue({ userColectorId: response.id });
+  onCollectorToggle(enabled: boolean) {
+    this.hasCollector = enabled;
+    const control = this.dailyPaymentForm.get('userColectorId')!;
+    control.setValidators(enabled ? [Validators.required] : []);
+    if (!enabled) {
+      control.reset(null);
+      this.onColectorChange(null);
     }
-
-    // Si no hay colector, limpiar el campo
-    if (!this.hasCollector) {
-      this.dailyPaymentForm.patchValue({ userColectorId: null });
-    }
-
-    this.dailyPaymentForm.patchValue({ userId: this.userId });
-
-    console.log("payload", this.dailyPaymentForm.value);
-
-    await firstValueFrom(this.dailyPaymentService.agregarPago(this.dailyPaymentForm.value));
-
-    await this.showAlert('Éxito', 'Pago diario guardado correctamente.');
-    this.modalCtrl.dismiss();
-
-  } catch (err) {
-    console.error(err);
-    await this.showAlert('Error', 'Error al guardar el pago diario.');
+    control.updateValueAndValidity();
   }
-}
 
-  
-
-
-  async showAlert(header: string, message: string) {
-    const alert = await this.alertController.create({
-      header,
-      message,
-      buttons: ['OK']
+  onColectorChange(value: number | string | null) {
+    this.isOtherColectorSelected = this.hasCollector && value === 'other';
+    ['otherColectorName', 'otherColectorLastName', 'otherColectorNumberId'].forEach(name => {
+      const control = this.dailyPaymentForm.get(name)!;
+      control.setValidators(this.isOtherColectorSelected ? [Validators.required, Validators.pattern(/\S/)] : []);
+      if (!this.isOtherColectorSelected) control.reset('');
+      control.updateValueAndValidity();
     });
-  
-    await alert.present();
   }
 
-  cerrar() {
-    this.modalCtrl.dismiss(null, 'refresh');
+  async submitForm() {
+    if (this.isSaving || this.loading || this.loadError || this.missingCatalogs || !this.user) return;
+    this.submitted = true;
+    this.saveError = '';
+    this.dailyPaymentForm.markAllAsTouched();
+    if (this.dailyPaymentForm.invalid) return;
+    this.isSaving = true;
+    try {
+      let value = this.dailyPaymentForm.value;
+      if (this.isOtherColectorSelected) {
+        const collector = await firstValueFrom(this.operadorService.agregarOperador({
+          firstName: value.otherColectorName.trim(), lastName: value.otherColectorLastName.trim(),
+          numberId: value.otherColectorNumberId.trim(), rol: 'COLECTOR', companyId: this.user.companyId
+        }));
+        if (!collector?.id) throw new Error('No se recibió el identificador del colector');
+        this.collectors = [...this.collectors, collector];
+        this.dailyPaymentForm.patchValue({ userColectorId: collector.id });
+        this.onColectorChange(collector.id);
+        value = this.dailyPaymentForm.value;
+      }
+      const payload = {
+        userId: this.user.id, vehicleId: Number(value.vehicleId), dailyDate: value.dailyDate,
+        userDriverId: Number(value.userDriverId),
+        userSecondDriverId: this.hasSecondDriver ? Number(value.userSecondDriverId) : null,
+        userColectorId: this.hasCollector ? Number(value.userColectorId) : null,
+        description: value.description?.trim() || 'Ingreso diario',
+        kilometerStart: value.kilometerStart == null || value.kilometerStart === '' ? null : Number(value.kilometerStart),
+        kilometerEnd: value.kilometerEnd == null || value.kilometerEnd === '' ? null : Number(value.kilometerEnd),
+        dailyPaymentTypes: value.dailyPaymentTypes.map((row: { paymentTypeId: number; amount: number }) => ({ paymentTypeId: Number(row.paymentTypeId), amount: Number(row.amount) }))
+      };
+      const saved = await firstValueFrom(this.dailyPaymentService.agregarPago(payload));
+      await this.modalCtrl.dismiss({ saved }, 'saved');
+    } catch {
+      this.saveError = 'No pudimos confirmar el guardado. Tus datos siguen aquí. Comprueba el historial antes de reintentar si hubo un problema de conexión.';
+    } finally { this.isSaving = false; }
   }
 
+  cerrar() { if (!this.isSaving) this.modalCtrl.dismiss(null, 'cancel'); }
+  ngOnDestroy() { this.destroyed$.next(); this.destroyed$.complete(); }
 }

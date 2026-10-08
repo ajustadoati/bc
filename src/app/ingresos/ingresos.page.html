@@ -1,70 +1,193 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/home"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Ingresos</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="abrirModalAgregar(user.userId)">
-        <ion-icon name="add-circle"></ion-icon> Agregar
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content>
-  <div class="payment-cards">
-    <ion-card *ngFor="let payment of dailyPayments" class="payment-card compact">
-      <ion-card-content>
-        <div class="card-header">
-          <div class="date-info">
-            <h3>{{ getLocalDate(payment.dailyDate) | date:'dd/MM/yyyy':'-04:00' }}</h3>
+<ion-content class="income-content">
+  <header class="income-topbar">
+    <a routerLink="/home" class="brand">
+      <span>
+        <ion-icon name="bus-outline" aria-hidden="true">
+        </ion-icon>
+      </span>Bus<span class="brand-light">Control</span>
+    </a>
+    <a routerLink="/home" class="back-link">
+      <ion-icon name="arrow-back-outline" aria-hidden="true">
+      </ion-icon>Mi escritorio</a>
+  </header>
+  <main class="income-workspace">
+    <div class="page-heading">
+      <div>
+        <p class="eyebrow">CADA JORNADA CUENTA</p>
+        <h1>Ingresos diarios</h1>
+        <p>Una vista clara de lo que entra a tu negocio.</p>
+      </div>
+      <button class="primary-button" (click)="abrirModalAgregar()" [disabled]="!user || loading || openingModal">
+        <ion-icon name="add-outline" aria-hidden="true">
+        </ion-icon>Registrar ingreso</button>
+    </div>
+    <section class="income-summary" aria-label="Resumen de los ingresos filtrados" [attr.aria-busy]="loading">
+      <div class="summary-card total-card">
+        <span class="summary-icon">
+          <ion-icon name="cash-outline" aria-hidden="true">
+          </ion-icon>
+        </span>
+        <div>
+          <p>Total registrado <span>USD</span>
+          </p>
+          <strong>{{ loading || loadError ? '—' : (total | currency:'USD':'symbol':'1.2-2') }}</strong>
+          <small>{{ periodLabel }} · Según los filtros seleccionados</small>
+        </div>
+      </div>
+      <div class="summary-card">
+        <span class="summary-icon blue">
+          <ion-icon name="receipt-outline" aria-hidden="true">
+          </ion-icon>
+        </span>
+        <div>
+          <p>Jornadas registradas</p>
+          <strong>{{ loading || loadError ? '—' : filteredPayments.length }}</strong>
+          <small>Registros en esta vista</small>
+        </div>
+      </div>
+      <div class="summary-card">
+        <span class="summary-icon orange">
+          <ion-icon name="bus-outline" aria-hidden="true">
+          </ion-icon>
+        </span>
+        <div>
+          <p>Buses con ingresos</p>
+          <strong>{{ loading || loadError ? '—' : activeVehicles }}</strong>
+          <small>Unidades en esta vista</small>
+        </div>
+      </div>
+    </section>
+    <section class="history-panel" aria-labelledby="history-title">
+      <div class="section-heading">
+        <div>
+          <h2 id="history-title">Historial de ingresos</h2>
+          <p>Consulta los ingresos por bus y fecha.</p>
+        </div>
+        <span class="period-badge">
+          <ion-icon name="calendar-outline" aria-hidden="true">
+          </ion-icon>{{ periodLabel }}</span>
+      </div>
+      <div class="filters">
+        <div class="search-field">
+          <label for="income-search" class="visually-hidden">Buscar por unidad, placa o descripción</label>
+          <ion-icon name="search-outline" aria-hidden="true">
+          </ion-icon>
+          <input id="income-search" type="search" [(ngModel)]="search" (ngModelChange)="filtersChanged()" placeholder="Buscar unidad, placa o descripción">
+        </div>
+        <div class="filter-field">
+          <label for="vehicle-filter">Bus</label>
+          <select id="vehicle-filter" [(ngModel)]="vehicleFilter" (ngModelChange)="filtersChanged()">
+            <option value="">Todos los buses</option>
+            <option *ngFor="let vehicle of vehiculos" [value]="vehicle.id">Unidad {{ vehicle.numberId }}</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <label for="period-filter">Período</label>
+          <select id="period-filter" [(ngModel)]="period" (ngModelChange)="filtersChanged()">
+            <option value="month">Este mes</option>
+            <option value="today">Hoy</option>
+            <option value="all">Todo el historial</option>
+            <option value="custom">Elegir fechas</option>
+          </select>
+        </div>
+      </div>
+      <div *ngIf="period === 'custom'" class="date-filters">
+        <div class="filter-field">
+          <label for="from-date">Desde</label>
+          <input id="from-date" type="date" [(ngModel)]="fromDate" (ngModelChange)="filtersChanged()" [attr.aria-invalid]="dateRangeError" aria-describedby="date-range-error">
+        </div>
+        <div class="filter-field">
+          <label for="to-date">Hasta</label>
+          <input id="to-date" type="date" [(ngModel)]="toDate" (ngModelChange)="filtersChanged()" [attr.aria-invalid]="dateRangeError" aria-describedby="date-range-error">
+        </div>
+        <p *ngIf="dateRangeError" id="date-range-error" role="alert">La fecha final debe ser igual o posterior a la inicial.</p>
+      </div>
+      <p *ngIf="actionError" class="notice error" role="alert">{{ actionError }}</p>
+      <p *ngIf="successMessage" class="notice success" role="status">{{ successMessage }}</p>
+      <p *ngIf="vehicleError && !loadError" class="notice" role="status">No pudimos cargar los nombres de los buses. Los ingresos siguen disponibles por su identificador.</p>
+      <div *ngIf="loading" class="empty-state" role="status">
+        <span class="empty-icon">
+          <ion-icon name="refresh-outline" aria-hidden="true">
+          </ion-icon>
+        </span>
+        <h3>Cargando tus jornadas…</h3>
+        <p>Estamos preparando el historial de ingresos.</p>
+      </div>
+      <div *ngIf="!loading && loadError" class="empty-state" role="alert">
+        <span class="empty-icon">
+          <ion-icon name="receipt-outline" aria-hidden="true">
+          </ion-icon>
+        </span>
+        <h3>No pudimos cargar tus ingresos</h3>
+        <p>Comprueba la conexión y vuelve a intentarlo.</p>
+        <button class="primary-button" (click)="loadPayments()">
+          <ion-icon name="refresh-outline" aria-hidden="true">
+          </ion-icon>Reintentar</button>
+      </div>
+      <ng-container *ngIf="!loading && !loadError">
+        <div *ngIf="filteredPayments.length" class="payment-list">
+          <div class="table-heading" aria-hidden="true">
+            <span>Jornada y unidad</span>
+            <span>Información</span>
+            <span>Total USD</span>
+            <span>
+            </span>
           </div>
-          <div class="total-badge">
-            <span class="amount">{{ getTotal(payment.dailyPaymentTypes) | currency:'USD':'symbol':'1.0-0' }}</span>
+          <article *ngFor="let payment of visiblePayments; trackBy: trackPayment" class="payment-row">
+            <div class="journey">
+              <span class="bus-icon">
+                <ion-icon name="bus-outline" aria-hidden="true">
+                </ion-icon>
+              </span>
+              <div>
+                <h3>Unidad {{ vehicleLabel(payment.vehicleId) }}</h3>
+                <p>{{ formatDate(payment.dailyDate) }}</p>
+              </div>
+            </div>
+            <div class="journey-info">
+              <p>{{ payment.description || 'Ingreso de la jornada' }}</p>
+              <small>
+                <span>{{ payment.dailyPaymentTypes.length }} {{ payment.dailyPaymentTypes.length === 1 ? 'tipo de pago' : 'tipos de pago' }}</span>
+                <span *ngIf="kilometers(payment.kilometerStart, payment.kilometerEnd) !== null">
+                  <ion-icon name="speedometer-outline" aria-hidden="true">
+                  </ion-icon>{{ kilometers(payment.kilometerStart, payment.kilometerEnd) }} km</span>
+              </small>
+            </div>
+            <strong class="payment-total">{{ getTotal(payment.dailyPaymentTypes) | currency:'USD':'symbol':'1.2-2' }}</strong>
+            <button class="detail-button" (click)="abrirModalDetalle(payment)" [disabled]="openingModal" [attr.aria-label]="'Ver detalle de la unidad ' + vehicleLabel(payment.vehicleId) + ', ' + formatDate(payment.dailyDate)">Ver detalle<ion-icon name="chevron-forward-outline" aria-hidden="true">
+              </ion-icon>
+            </button>
+          </article>
+          <div class="list-footer">
+            <span>{{ filteredPayments.length }} {{ filteredPayments.length === 1 ? 'registro' : 'registros' }} · Más recientes primero</span>
+            <div class="pagination" *ngIf="pageCount > 1">
+              <button (click)="page = page - 1" [disabled]="page === 1" aria-label="Página anterior">
+                <ion-icon name="chevron-back-outline" aria-hidden="true">
+                </ion-icon>
+              </button>
+              <span aria-live="polite">{{ page }} de {{ pageCount }}</span>
+              <button (click)="page = page + 1" [disabled]="page === pageCount" aria-label="Página siguiente">
+                <ion-icon name="chevron-forward-outline" aria-hidden="true">
+                </ion-icon>
+              </button>
+            </div>
           </div>
         </div>
-        
-        <div class="card-body">
-          <div class="quick-info">
-            <span class="info-item">
-              <ion-icon name="bus-outline"></ion-icon>
-              Unidad {{ getVehicleNumberId(payment.vehicleId) }}
-            </span>
-            <span class="info-item" *ngIf="payment.kilometerStart && payment.kilometerEnd">
-              <ion-icon name="speedometer-outline"></ion-icon>
-              {{ payment.kilometerEnd - payment.kilometerStart }} km
-            </span>
-            <span class="info-item" *ngIf="hasDriverInfo(payment)">
-              <ion-icon name="person-outline"></ion-icon>
-              {{ getDriversCount(payment) }} chofer(es)
-            </span>
-          </div>
+        <div *ngIf="!filteredPayments.length && !dateRangeError" class="empty-state">
+          <span class="empty-icon">
+            <ion-icon name="receipt-outline" aria-hidden="true">
+            </ion-icon>
+          </span>
+          <h3>{{ dailyPayments.length ? 'No hay jornadas con estos filtros' : 'Tu primera jornada empieza aquí' }}</h3>
+          <p>{{ dailyPayments.length ? 'Prueba otro período, bus o término de búsqueda.' : 'Registra un ingreso y empieza a construir el historial de tu flota.' }}</p>
+          <button *ngIf="dailyPayments.length" class="secondary-button" (click)="clearFilters()">Limpiar filtros</button>
+          <button *ngIf="!dailyPayments.length" class="primary-button" (click)="abrirModalAgregar()" [disabled]="!user || openingModal">
+            <ion-icon name="add-outline" aria-hidden="true">
+            </ion-icon>Registrar mi primer ingreso</button>
         </div>
-        
-        <div class="card-actions">
-          <ion-button fill="clear" size="small" (click)="abrirModalDetalle(payment)">
-            <ion-icon name="eye-outline" slot="start"></ion-icon>
-            Ver Detalle
-          </ion-button>
-          <span class="payment-count">{{ payment.dailyPaymentTypes.length }} registros</span>
-        </div>
-      </ion-card-content>
-    </ion-card>
-  </div>
-  
-  <!-- Mensaje cuando no hay datos -->
-  <div *ngIf="dailyPayments && dailyPayments.length === 0" class="empty-state">
-    <ion-card>
-      <ion-card-content class="ion-text-center">
-        <ion-icon name="document-outline" size="large" color="medium"></ion-icon>
-        <h3>No hay ingresos registrados</h3>
-        <p>Comienza agregando tu primer ingreso diario</p>
-        <ion-button (click)="abrirModalAgregar(user.userId)" color="primary">
-          <ion-icon name="add-circle-outline" slot="start"></ion-icon>
-          Agregar Primer Ingreso
-        </ion-button>
-      </ion-card-content>
-    </ion-card>
-  </div>
+      </ng-container>
+    </section>
+    <footer class="page-footer">Tu historial, siempre a mano.<span>Bus Control · Cada bus cuenta.</span>
+    </footer>
+  </main>
 </ion-content>
