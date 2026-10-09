@@ -1,70 +1,40 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/gastos"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Nuevo Gasto</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content>
-  <form (ngSubmit)="submitForm()" [formGroup]="formGasto">
-    <ion-item>
-      <ion-label position="floating">Categoría</ion-label>
-      <ion-select (ionChange)="onCategoryChange($event.detail.value)">
-        <ion-select-option *ngFor="let type of categories" [value]="type.id">
-          {{ type.name }}
-        </ion-select-option>
-      </ion-select>
-    </ion-item>
-    <ion-item *ngIf="expenseTypes.length > 0">
-      <ion-label position="floating">Tipo</ion-label>
-      <ion-select formControlName="expenseTypeId">
-        <ion-select-option *ngFor="let sub of expenseTypes" [value]="sub.id">
-          {{ sub.name }}
-        </ion-select-option>
-      </ion-select>
-    </ion-item>
-
-    <ion-item>
-      <ion-label position="floating">Taller</ion-label>
-      <ion-select formControlName="workshopId">
-        <ion-select-option *ngFor="let ws of workshops" [value]="ws.id">
-          {{ ws.name }}
-        </ion-select-option>
-      </ion-select>
-    </ion-item>
-
-    <ion-item>
-      <ion-label position="floating">Fecha</ion-label>
-      <ion-input type="date" formControlName="expenseDate"></ion-input>
-    </ion-item>
-
-    <ion-item>
-      <ion-label position="floating">Descripción</ion-label>
-      <ion-input formControlName="description"></ion-input>
-    </ion-item>
-
-    <ion-item>
-      <ion-label position="floating">Kilómetros</ion-label>
-      <ion-input type="number" formControlName="kilometer"></ion-input>
-    </ion-item>
-
-    <ion-item>
-      <ion-label position="floating">Monto en Dolares</ion-label>
-      <ion-input type="number" formControlName="amountDl"></ion-input>
-    </ion-item>
-
-    <ion-item>
-      <ion-label position="floating">Monto Bs</ion-label>
-      <ion-input type="number" formControlName="amount"></ion-input>
-    </ion-item>
-
-    <ion-item>
-      <ion-label position="floating">Mano de obra</ion-label>
-      <ion-input type="number" formControlName="labour"></ion-input>
-    </ion-item>
-
-    <ion-button expand="block" type="submit" [disabled]="formGasto.invalid">Guardar</ion-button>
-  </form>
-</ion-content>
+<ion-header class="ion-no-border"><div class="expense-topbar"><span class="brand"><ion-icon name="bus-outline" aria-hidden="true"></ion-icon>Bus<span>Control</span></span><button class="back-link" type="button" [disabled]="busy" (click)="cerrar()"><ion-icon name="arrow-back-outline" aria-hidden="true"></ion-icon>Volver a los gastos</button></div></ion-header>
+<ion-content><main class="workspace expense-workspace">
+  <div class="page-heading"><div><p class="eyebrow">CUIDAR TU FLOTA TAMBIÉN ES LLEVAR LAS CUENTAS</p><h1>Registrar gasto</h1><p>{{ vehicleLabel }} · Los campos con * son obligatorios.</p></div><span class="badge" *ngIf="vehicle">{{ vehicle.serial }}</span></div>
+  <div class="state" *ngIf="!vehicleId"><ion-icon name="bus-outline" aria-hidden="true"></ion-icon><h2>Selecciona un bus</h2><p>Abre el historial de una unidad para registrar sus gastos.</p><button class="primary" (click)="cerrar()">Ver buses</button></div>
+  <ng-container *ngIf="vehicleId">
+    <p class="notice" *ngIf="loading" role="status">Cargando los datos del bus y las opciones del gasto…</p>
+    <div class="notice error" role="alert" *ngIf="!loading && (vehicleError || categoryError)"><p>{{ vehicleError ? 'No pudimos cargar el bus de tu flota.' : 'No pudimos cargar las categorías de gastos.' }} Tus datos del formulario se conservan.</p><button class="secondary" (click)="loadData()" [disabled]="busy">Reintentar carga</button></div>
+    <div class="state" *ngIf="!loading && !vehicleError && !vehicle"><ion-icon name="bus-outline" aria-hidden="true"></ion-icon><h2>Este bus no está disponible en tu flota</h2><p>Vuelve al listado y abre la unidad en la que quieres registrar el gasto.</p><button class="primary" [disabled]="busy" (click)="volverABuses()">Ver buses</button></div>
+    <p class="notice" role="status" *ngIf="catalogMessage">{{ catalogMessage }}</p>
+    <div class="expense-layout" *ngIf="loading || vehicleError || vehicle">
+      <form id="expense-form" [formGroup]="formGasto" (ngSubmit)="submitForm()" novalidate>
+        <fieldset [disabled]="loading || vehicleError || categoryError || busy || saveCompleted">
+          <section class="panel"><div class="panel-title"><span class="section-icon"><ion-icon name="pricetag-outline" aria-hidden="true"></ion-icon></span><div><h2>¿Qué gasto quieres registrar?</h2><p>Elige el concepto y la fecha en que ocurrió</p></div></div><div class="form-grid">
+            <div class="field"><label for="expense-category">Categoría *</label><select id="expense-category" formControlName="categoryId" [attr.aria-invalid]="!!fieldError('categoryId')" aria-describedby="category-error"><option [ngValue]="null">Selecciona una categoría</option><option *ngFor="let item of categories" [ngValue]="item.id">{{ item.name }}</option></select><span id="category-error" class="field-error">{{ fieldError('categoryId') }}</span><div *ngIf="!loading && !categoryError && !categories.length"><p class="hint">Aún no hay categorías de gastos.</p><button class="text-action" type="button" (click)="openCatalog('categories')" [disabled]="busy"><ion-icon name="add-outline" aria-hidden="true"></ion-icon>Crear categoría</button></div></div>
+            <div class="field"><label for="expense-type">Tipo de gasto *</label><select id="expense-type" formControlName="expenseTypeId" [attr.aria-invalid]="!!fieldError('expenseTypeId')" aria-describedby="type-error type-hint"><option [ngValue]="null">{{ loadingTypes ? 'Cargando tipos…' : 'Selecciona el tipo' }}</option><option *ngFor="let item of expenseTypes" [ngValue]="item.id">{{ item.name }}</option></select><span id="type-error" class="field-error">{{ fieldError('expenseTypeId') }}</span><p class="hint" id="type-hint" *ngIf="!selectedCategory">Primero selecciona una categoría.</p><div *ngIf="typesError" class="type-notice" role="alert"><p>No pudimos cargar los tipos de esta categoría.</p><button class="text-action" type="button" (click)="retryTypes()">Reintentar tipos</button></div><div *ngIf="selectedCategory && !loadingTypes && !typesError && !expenseTypes.length"><p class="hint">Esta categoría aún no tiene tipos de gasto.</p><button class="text-action" type="button" (click)="openCatalog('types')"><ion-icon name="add-outline" aria-hidden="true"></ion-icon>Añadir tipo de gasto</button></div><p class="hint" role="status" *ngIf="loadingTypes">Cargando los tipos de esta categoría…</p></div>
+            <div class="field"><label for="expense-date">Fecha del gasto *</label><input id="expense-date" type="date" formControlName="expenseDate" [max]="today" [attr.aria-invalid]="!!fieldError('expenseDate')" aria-describedby="date-error"><span id="date-error" class="field-error">{{ fieldError('expenseDate') }}</span></div>
+            <div class="field"><label for="expense-workshop">Taller <span class="hint">(opcional)</span></label><select id="expense-workshop" formControlName="workshopId" aria-describedby="workshop-hint"><option [ngValue]="null">Sin taller asociado</option><option *ngFor="let item of workshops" [ngValue]="item.id">{{ item.name }}</option></select><p class="hint" id="workshop-hint" *ngIf="workshopError" role="status">No pudimos cargar los talleres. Puedes guardar sin taller o reintentar la carga.</p><button class="text-action" type="button" *ngIf="workshopError" (click)="loadData()">Reintentar talleres</button><button class="text-action" type="button" *ngIf="!workshopError" (click)="openCatalog('workshops')"><ion-icon name="add-outline" aria-hidden="true"></ion-icon>Registrar taller</button></div>
+          </div></section>
+          <section class="panel"><div class="panel-title"><span class="section-icon orange"><ion-icon name="wallet-outline" aria-hidden="true"></ion-icon></span><div><h2>Importes del gasto</h2><p>Completa al menos un monto. Puedes registrar ambos.</p></div></div><div class="form-grid">
+            <div class="field"><label for="expense-usd">Monto en dólares (USD)</label><div class="money-input"><span aria-hidden="true">$</span><input id="expense-usd" type="number" inputmode="decimal" min="0" step="0.01" formControlName="amountDl" placeholder="0.00" [attr.aria-invalid]="!!fieldError('amountDl') || showAmountError" aria-describedby="usd-error amount-error"></div><span id="usd-error" class="field-error">{{ fieldError('amountDl') }}</span></div>
+            <div class="field"><label for="expense-bs">Monto en bolívares (Bs)</label><div class="money-input"><span aria-hidden="true">Bs</span><input id="expense-bs" type="number" inputmode="decimal" min="0" step="0.01" formControlName="amount" placeholder="0.00" [attr.aria-invalid]="!!fieldError('amount') || showAmountError" aria-describedby="bs-error amount-error"></div><span id="bs-error" class="field-error">{{ fieldError('amount') }}</span></div>
+            <p class="field-error full" id="amount-error" role="alert" *ngIf="showAmountError">Registra un monto mayor que cero en dólares o bolívares.</p>
+          </div><p class="hint currency-hint">Los importes se registran por separado, sin conversión automática.</p></section>
+          <section class="panel"><div class="panel-title"><span class="section-icon blue"><ion-icon name="document-text-outline" aria-hidden="true"></ion-icon></span><div><h2>Detalles adicionales</h2><p>Información opcional para reconocer el gasto después</p></div></div><div class="form-grid">
+            <div class="field"><label for="expense-kilometer">Kilometraje</label><input id="expense-kilometer" type="number" inputmode="numeric" min="0" step="1" formControlName="kilometer" placeholder="Lectura del odómetro" [attr.aria-invalid]="!!fieldError('kilometer')" aria-describedby="km-error"><span id="km-error" class="field-error">{{ fieldError('kilometer') }}</span></div>
+            <div class="field"><label for="expense-labour">Mano de obra</label><input id="expense-labour" type="number" inputmode="decimal" min="0" step="0.01" formControlName="labour" placeholder="0.00" [attr.aria-invalid]="!!fieldError('labour')" aria-describedby="labour-error"><span id="labour-error" class="field-error">{{ fieldError('labour') }}</span></div>
+            <div class="field full"><label for="expense-description">Descripción</label><textarea id="expense-description" formControlName="description" maxlength="255" rows="3" placeholder="Ej. Cambio de aceite y filtro del motor" [attr.aria-invalid]="!!fieldError('description')" aria-describedby="description-error"></textarea><span id="description-error" class="field-error">{{ fieldError('description') }}</span><p class="hint">{{ (formGasto.controls.description.value || '').length }}/255 caracteres</p></div>
+          </div></section>
+        </fieldset>
+      </form>
+      <aside class="expense-summary" aria-label="Resumen del gasto">
+        <section class="vehicle-card"><span class="section-icon"><ion-icon name="bus-outline" aria-hidden="true"></ion-icon></span><span class="eyebrow">GASTO ASOCIADO A</span><h2>{{ vehicleLabel }}</h2><p *ngIf="vehicle">{{ vehicle.marca }} {{ vehicle.model }}</p><span class="vehicle-plate" *ngIf="vehicle">{{ vehicle.serial }}</span></section>
+        <section class="panel receipt"><div class="panel-title"><span class="section-icon blue"><ion-icon name="construct-outline" aria-hidden="true"></ion-icon></span><div><h2>Resumen del registro</h2><p>Comprueba los datos antes de guardar</p></div></div><dl class="receipt-data"><div><dt>Concepto</dt><dd>{{ selectedType?.name || 'Por seleccionar' }}</dd></div><div><dt>Categoría</dt><dd>{{ selectedCategory?.name || 'Por seleccionar' }}</dd></div><div><dt>Fecha</dt><dd>{{ previewDate }}</dd></div><div><dt>Taller</dt><dd>{{ selectedWorkshop?.name || 'Sin taller asociado' }}</dd></div></dl>
+          <div class="amount-summary"><span>Monto en dólares <small>USD</small></span><strong>{{ previewAmount('amountDl') === null ? '—' : (previewAmount('amountDl') | currency:'USD':'symbol':'1.2-2') }}</strong></div><div class="amount-summary bs"><span>Monto en bolívares <small>Bs</small></span><strong>{{ previewAmount('amount') === null ? '—' : 'Bs ' + (previewAmount('amount') | number:'1.2-2') }}</strong></div>
+        </section>
+      </aside>
+    </div>
+  </ng-container>
+</main></ion-content>
+<ion-footer class="ion-no-border"><div class="expense-footer"><p class="notice" role="status" *ngIf="saveCompleted">El gasto se guardó. Puedes volver al historial para consultarlo.</p><p class="notice error" role="alert" *ngIf="saveError">{{ saveError }}</p><div class="footer-actions"><button type="button" class="secondary" [disabled]="busy" (click)="cerrar()">{{ saveCompleted ? 'Volver al historial' : 'Cancelar' }}</button><button class="primary" type="submit" form="expense-form" [disabled]="!canSave"><ion-icon name="checkmark-outline" aria-hidden="true"></ion-icon>{{ isSaving ? 'Guardando…' : 'Guardar gasto' }}</button></div></div></ion-footer>

@@ -1,58 +1,21 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Agregar Operador</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="cerrar()">
-        <ion-icon slot="start" name="log-out-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Operadores</ion-title>
-    </ion-toolbar>
-  </ion-header>
-
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Registro de Operadores</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <form id="vehicle-form" (ngSubmit)="agregarOperador()">
-        <ion-item>
-          <ion-label>Tipo de Operador</ion-label>
-          <ion-select [(ngModel)]="nuevoOperador.rol" name="rol" required>
-            <ion-select-option *ngFor="let type of types" [value]="type.type">
-              {{ type.type }}
-            </ion-select-option>
-          </ion-select>
-        </ion-item>
-        <ion-item>
-          <ion-label position="floating">Cédula</ion-label>
-          <ion-input type="text" [(ngModel)]="nuevoOperador.numberId" name="numberId" required></ion-input>
-        </ion-item>
-        <ion-item>
-          <ion-label position="floating">Nombres</ion-label>
-          <ion-input type="text" [(ngModel)]="nuevoOperador.firstName" name="marca" required></ion-input>
-        </ion-item>
-        <ion-item>
-          <ion-label position="floating">Apellidos</ion-label>
-          <ion-input type="text" [(ngModel)]="nuevoOperador.lastName" name="model" required></ion-input>
-        </ion-item>
-        <ion-item>
-          <ion-label position="floating">Email</ion-label>
-          <ion-input type="text" [(ngModel)]="nuevoOperador.email" name="serial"></ion-input>
-        </ion-item>
-       
-        <ion-item>
-          <ion-label position="floating">Teléfono</ion-label>
-          <ion-input type="text" [(ngModel)]="nuevoOperador.mobileNumber" name="company" required></ion-input>
-        </ion-item>
-        <ion-button expand="full" type="submit">Registrar</ion-button>
-      </form>
-    </ion-card-content>
-  </ion-card>
-
-</ion-content>
+<ion-header class="ion-no-border"><div class="modal-heading"><div><span class="eyebrow">UNA PERSONA MÁS EN TU EQUIPO</span><h1>Registrar operador</h1></div><button class="icon-button" aria-label="Cerrar registro de operador" [disabled]="isSaving" (click)="cerrar()"><ion-icon name="close-outline" aria-hidden="true"></ion-icon></button></div></ion-header>
+<ion-content><main class="modal-body">
+  <section class="hero"><div><h2>El próximo compañero de ruta</h2><p>Registra sus datos para seleccionarlo en tus jornadas.<br>Los campos con * son obligatorios.</p></div><span class="section-icon" aria-hidden="true"><ion-icon name="people-outline"></ion-icon></span></section>
+  <p class="notice" role="status" *ngIf="loading">Cargando los datos de tu empresa…</p>
+  <div class="notice error" role="alert" *ngIf="loadError"><p>No pudimos cargar los datos necesarios para registrar el operador.</p><button class="secondary" (click)="loadData()">Reintentar</button></div>
+  <form id="operator-form" [formGroup]="form" (ngSubmit)="agregarOperador()" novalidate>
+    <fieldset [disabled]="loading || loadError || isSaving" style="border:0;padding:0;margin:0;min-width:0">
+      <section class="panel"><div class="panel-title"><span class="section-icon"><ion-icon name="person-outline" aria-hidden="true"></ion-icon></span><div><h2>Identidad y rol</h2><p>Cómo identificarás al operador en tu equipo</p></div></div><div class="form-grid">
+        <div class="field"><label for="operator-type">Tipo de operador *</label><select id="operator-type" formControlName="rol" [attr.aria-invalid]="!!fieldError('rol')" aria-describedby="role-error"><option value="">Selecciona el rol</option><option value="CONDUCTOR">Conductor</option><option value="COLECTOR">Colector</option></select><span id="role-error" class="field-error">{{ fieldError('rol') }}</span></div>
+        <div class="field"><label for="operator-id">Cédula *</label><input id="operator-id" formControlName="numberId" autocomplete="off" maxlength="255" placeholder="Documento de identidad" [attr.aria-invalid]="!!fieldError('numberId')" aria-describedby="id-error"><span id="id-error" class="field-error">{{ fieldError('numberId') }}</span></div>
+        <div class="field"><label for="operator-firstname">Nombres *</label><input id="operator-firstname" formControlName="firstName" autocomplete="given-name" maxlength="255" [attr.aria-invalid]="!!fieldError('firstName')" aria-describedby="first-error"><span id="first-error" class="field-error">{{ fieldError('firstName') }}</span></div>
+        <div class="field"><label for="operator-lastname">Apellidos *</label><input id="operator-lastname" formControlName="lastName" autocomplete="family-name" maxlength="255" [attr.aria-invalid]="!!fieldError('lastName')" aria-describedby="last-error"><span id="last-error" class="field-error">{{ fieldError('lastName') }}</span></div>
+      </div></section>
+      <section class="panel"><div class="panel-title"><span class="section-icon blue"><ion-icon name="call-outline" aria-hidden="true"></ion-icon></span><div><h2>Datos de contacto</h2><p>Para encontrarlo cuando lo necesites</p></div></div><div class="form-grid">
+        <div class="field"><label for="operator-phone">Teléfono *</label><input id="operator-phone" formControlName="mobileNumber" type="tel" autocomplete="tel" placeholder="Ej. +58 412 123 4567" [attr.aria-invalid]="!!fieldError('mobileNumber')" aria-describedby="phone-error"><span id="phone-error" class="field-error">{{ fieldError('mobileNumber') }}</span></div>
+        <div class="field"><label for="operator-email">Correo electrónico <span class="hint">(opcional)</span></label><input id="operator-email" formControlName="email" type="email" autocomplete="email" maxlength="255" placeholder="nombre@correo.com" [attr.aria-invalid]="!!fieldError('email')" aria-describedby="email-error"><span id="email-error" class="field-error">{{ fieldError('email') }}</span></div>
+      </div></section>
+    </fieldset>
+  </form>
+</main></ion-content>
+<ion-footer class="ion-no-border"><div class="modal-footer"><p class="notice error" role="alert" *ngIf="saveError">{{ saveError }}</p><div class="footer-actions"><button class="secondary" [disabled]="isSaving" (click)="cerrar()">Cancelar</button><button class="primary" type="submit" form="operator-form" [disabled]="loading || loadError || isSaving"><ion-icon name="checkmark-outline" aria-hidden="true"></ion-icon>{{ isSaving ? 'Guardando…' : 'Guardar operador' }}</button></div></div></ion-footer>

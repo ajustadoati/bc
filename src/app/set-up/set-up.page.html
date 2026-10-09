@@ -1,20 +1,12 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/home"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Configuración</ion-title>
-    <!-- <ion-buttons slot="end">
-      <ion-button (click)="openWorkshopModal()">Ver Talleres</ion-button>
-    </ion-buttons> -->
-  </ion-toolbar>
-</ion-header>
-
 <ion-content>
-  <ion-item button (click)="openWorkshopModal()">
-    <ion-label>Talleres</ion-label>
-  </ion-item>
-  <ion-item button (click)="openCategoriashopModal()">
-    <ion-label>Categorías</ion-label>
-  </ion-item>
+  <header class="topbar"><a routerLink="/home" class="brand"><ion-icon name="bus-outline" aria-hidden="true"></ion-icon>Bus<span>Control</span></a><a routerLink="/home" class="back-link"><ion-icon name="arrow-back-outline" aria-hidden="true"></ion-icon>Mi escritorio</a></header>
+  <main class="workspace"><div class="page-heading"><div><p class="eyebrow">LAS BASES DE UN NEGOCIO ORDENADO</p><h1>Configuración</h1><p>Organiza tus talleres y la forma en que clasificas tus gastos.</p></div></div>
+    <section class="hero"><div><span class="eyebrow">MENOS BÚSQUEDAS. MÁS CLARIDAD.</span><h2>Prepara hoy.<br>Simplifica cada jornada.</h2><p>Un directorio de talleres y categorías claras<br>hacen más fácil registrar los gastos de tu flota.</p></div><div class="hero-art" aria-hidden="true"><ion-icon name="construct-outline"></ion-icon><ion-icon name="options-outline"></ion-icon><ion-icon name="folder-outline"></ion-icon></div></section>
+    <p class="notice error" role="alert" *ngIf="actionError" style="margin-top:20px">{{ actionError }}</p><p class="notice success" role="status" *ngIf="successMessage" style="margin-top:20px">{{ successMessage }}</p>
+    <div class="settings-layout"><section class="settings-sections" aria-label="Secciones de configuración">
+      <article class="setting-card"><div class="setting-top"><span class="section-icon blue"><ion-icon name="construct-outline" aria-hidden="true"></ion-icon></span><span class="badge blue">Directorio</span></div><h2>Talleres</h2><p>Los aliados que cuidan tus buses. Guarda su teléfono y dirección para encontrarlos fácilmente.</p><div class="setting-count" *ngIf="!workshopError" role="status"><strong>{{ loadingWorkshops ? '—' : workshops.length }}</strong><span>talleres registrados</span></div><div class="notice error" *ngIf="workshopError" role="alert"><p>No pudimos cargar el resumen de talleres.</p><button class="secondary" (click)="loadWorkshops()">Reintentar</button></div><button class="setting-action" (click)="openWorkshopModal()" [disabled]="openingModal">Gestionar talleres<ion-icon name="chevron-forward-outline" aria-hidden="true"></ion-icon></button></article>
+      <article class="setting-card"><div class="setting-top"><span class="section-icon orange"><ion-icon name="folder-outline" aria-hidden="true"></ion-icon></span><span class="badge">Organización</span></div><h2>Categorías y tipos de gasto</h2><p>Agrupa los gastos de tu flota y añade opciones específicas dentro de cada categoría.</p><div class="setting-count" *ngIf="!categoryError" role="status"><strong>{{ loadingCategories ? '—' : categorias.length }}</strong><span>categorías registradas</span></div><div class="notice error" *ngIf="categoryError" role="alert"><p>No pudimos cargar el resumen de categorías.</p><button class="secondary" (click)="loadCategorias()">Reintentar</button></div><button class="setting-action" (click)="openCategoriashopModal()" [disabled]="openingModal">Gestionar categorías<ion-icon name="chevron-forward-outline" aria-hidden="true"></ion-icon></button></article>
+    </section><aside class="settings-guide"><span class="section-icon"><ion-icon name="pricetag-outline" aria-hidden="true"></ion-icon></span><h2>De lo general al detalle</h2><p>Las categorías agrupan tus gastos. Los tipos te ayudan a especificar qué pagaste.</p><div class="guide-example"><span>Por ejemplo</span><strong>Mantenimiento</strong><ion-icon name="chevron-forward-outline" aria-hidden="true"></ion-icon><div><span>Cambio de aceite</span><span>Repuestos</span></div></div><p class="guide-note">Crea primero la categoría. Después abre su lista para añadir los tipos de gasto que utilizas.</p></aside></div>
+    <footer class="page-footer"><span>Todo listo para tu próxima jornada.</span><span>Bus Control · Cada bus cuenta.</span></footer>
+  </main>
 </ion-content>

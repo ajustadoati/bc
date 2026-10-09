@@ -1,19 +1,35 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/home"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Vehículos</ion-title>
-  </ion-toolbar>
+<ion-header class="ion-no-border">
+  <header class="topbar">
+    <a class="brand" routerLink="/home"><ion-icon name="bus-outline" aria-hidden="true"></ion-icon>Bus<span>Control</span></a>
+    <a class="back-link" routerLink="/home"><ion-icon name="arrow-back-outline" aria-hidden="true"></ion-icon>Mi escritorio</a>
+  </header>
 </ion-header>
-
 <ion-content>
-  <ion-list>
-    <ion-item *ngFor="let vehicle of vehicles" (click)="goToExpenses(vehicle.id)">
-      <ion-label>
-        <h2>Unidad {{ vehicle.numberId }} - {{ vehicle.marca }} {{ vehicle.model }}</h2>
-        <p>{{ vehicle.serial }}</p>
-      </ion-label>
-    </ion-item>
-  </ion-list>
+  <main class="workspace">
+    <div class="page-heading">
+      <div><p class="eyebrow">CADA GASTO, EN SU LUGAR</p><h1>{{ registrationMode ? 'Registrar gasto' : 'Gastos de tu flota' }}</h1><p>Selecciona el bus para registrar un gasto o consultar su historial.</p></div>
+      <span class="badge" *ngIf="!loading && !loadError">{{ vehicles.length }} {{ vehicles.length === 1 ? 'bus' : 'buses' }}</span>
+    </div>
+    <section class="expense-intro" aria-label="Cómo registrar un gasto">
+      <div><span class="eyebrow">EMPIEZA POR TU UNIDAD</span><h2>Tu flota, con las cuentas claras.</h2><p>Elige un bus y pulsa «Registrar gasto». Después, completa el concepto, la fecha y el importe.</p><div class="steps"><span><b>1</b>Elige el bus</span><ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon><span><b>2</b>Registra el gasto</span></div></div>
+      <img src="assets/illustrations/bus-fleet.svg" alt="" width="640" height="380">
+    </section>
+    <section class="directory" aria-labelledby="expense-fleet-title" [attr.aria-busy]="loading">
+      <div class="section-heading"><div><h2 id="expense-fleet-title">¿Para qué bus es el gasto?</h2><p>Busca por unidad, placa, marca o empresa.</p></div></div>
+      <div class="field bus-search"><label for="expense-bus-search">Buscar bus</label><div><ion-icon name="search-outline" aria-hidden="true"></ion-icon><input id="expense-bus-search" type="search" [(ngModel)]="search" [disabled]="loading || loadError" placeholder="Unidad, placa, marca…"></div></div>
+      <div class="state" *ngIf="loading" role="status"><ion-icon name="refresh-outline" aria-hidden="true"></ion-icon><h3>Cargando tus buses…</h3><p>Estamos preparando las unidades de tu flota.</p></div>
+      <div class="state" *ngIf="!loading && loadError" role="alert"><ion-icon name="bus-outline" aria-hidden="true"></ion-icon><h3>No pudimos cargar tus buses</h3><p>Comprueba la conexión y vuelve a intentarlo.</p><button class="primary" type="button" (click)="loadVehicles()"><ion-icon name="refresh-outline" aria-hidden="true"></ion-icon>Reintentar</button></div>
+      <ng-container *ngIf="!loading && !loadError">
+        <div class="expense-buses" *ngIf="filteredVehicles.length">
+          <article class="expense-bus" *ngFor="let vehicle of filteredVehicles; trackBy: trackVehicle">
+            <div class="bus-heading"><span class="section-icon"><ion-icon name="bus-outline" aria-hidden="true"></ion-icon></span><span class="badge">{{ vehicle.serial || 'Sin placa' }}</span></div>
+            <h3>Bus {{ vehicle.numberId }}</h3><p class="bus-model">{{ vehicle.marca }} {{ vehicle.model }}</p><p class="bus-company">{{ vehicle.company || 'Sin empresa registrada' }}</p>
+            <div class="bus-actions"><a class="primary" [routerLink]="['/vehiculos', vehicle.id, 'gastos', 'nuevo']" [attr.aria-label]="'Registrar gasto del bus ' + vehicle.numberId"><ion-icon name="add-outline" aria-hidden="true"></ion-icon>Registrar gasto</a><a class="history-link" [routerLink]="['/vehiculos', vehicle.id, 'gastos']" [attr.aria-label]="'Ver gastos del bus ' + vehicle.numberId"><ion-icon name="document-text-outline" aria-hidden="true"></ion-icon>Ver gastos<ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon></a></div>
+          </article>
+        </div>
+        <div class="state" *ngIf="!filteredVehicles.length"><ion-icon name="bus-outline" aria-hidden="true"></ion-icon><h3>{{ vehicles.length ? 'No encontramos ese bus' : 'Primero registra un bus' }}</h3><p>{{ vehicles.length ? 'Prueba otra unidad, placa o marca.' : 'Añade una unidad a tu flota para empezar a registrar sus gastos.' }}</p><button class="secondary" type="button" *ngIf="vehicles.length" (click)="search = ''">Limpiar búsqueda</button><a class="primary" routerLink="/vehiculos" *ngIf="!vehicles.length">Ir a mis buses</a></div>
+      </ng-container>
+    </section>
+    <footer class="page-footer"><span>Cuida tus buses. Lleva tus cuentas.</span><span>Bus Control · Tu flota, a mano.</span></footer>
+  </main>
 </ion-content>

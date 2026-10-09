@@ -1,73 +1,8 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ModalController } from '@ionic/angular';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonButtons, IonItem, IonButton,IonLabel,IonInput, IonIcon, IonCard, IonCardContent } from '@ionic/angular/standalone';
-import { FormsModule,FormBuilder, FormGroup, Validators,ReactiveFormsModule } from '@angular/forms';
-import { CategoriaService } from 'src/app/services/categoria.service';
-import { TipoGastoService } from 'src/app/services/tipo-gasto.service';
+import { Component } from '@angular/core';
+import { CatalogKind } from '../../shared/management.models';
+import { CatalogFormBase, CATALOG_FORM_IMPORTS } from '../catalog-form.page';
 
-@Component({
-  selector: 'app-add-sub-categoria-modal',
-  templateUrl: './add-sub-categoria-modal.page.html',
-  styleUrls: ['./add-sub-categoria-modal.page.scss'],
-  standalone: true,
-  imports: [IonIcon, CommonModule, ReactiveFormsModule, IonButton, IonItem, IonButtons, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonLabel, IonInput,  IonCard, IonCardContent]
-})
-export class AddSubCategoriaModalPage implements OnInit {
-  @Input() categoriaId!: number;
-  @Input() categoriaName!: string; 
-
-  formAddSubCategoria!: FormGroup;
-  categoriasDisponibles: any[] = [];
-
-  constructor(
-    private modalCtrl: ModalController,
-    private fb: FormBuilder,
-    private categoriaService: CategoriaService,
-    private tipoGastoService: TipoGastoService
-
-  ) {}
-
-  ngOnInit() {
-    this.formAddSubCategoria = this.fb.group({
-      name: ['', Validators.required],
-      expenseCategoryId: [this.categoriaId, Validators.required] 
-    });
-
-    this.loadCategorias();
-  }
-
-  onCategoriaChange(event: any) {
-    const categoriaSeleccionada = event.detail.value;
-    this.formAddSubCategoria.controls['expenseCategoryId'].setValue(categoriaSeleccionada);
-  }  
-
-  loadCategorias() {
-    this.categoriaService.getAll().subscribe(data => {
-      this.categoriasDisponibles = data;
-      console.log(data)
-    });
-  }
-
-  submitForm() {
-    console.log("Valor del formulario:", this.formAddSubCategoria.value);
-    
-    if (this.formAddSubCategoria.valid) {
-      this.tipoGastoService.addSubCategoria(this.formAddSubCategoria.value).subscribe({
-        next: (response) => {
-          console.log('Subcategoría creada:', response);
-          this.modalCtrl.dismiss({ newSubCategoria: response });
-        },
-        error: (err) => {
-          console.error('Error al crear subcategoría', err);
-        }
-      });
-    }
-  }
-
-  closeModal() {
-    this.modalCtrl.dismiss();
-  }
-
+@Component({ selector: 'app-add-sub-categoria-modal', templateUrl: '../catalog-form.page.html', styleUrls: ['../../shared/management.scss'], standalone: true, imports: CATALOG_FORM_IMPORTS })
+export class AddSubCategoriaModalPage extends CatalogFormBase {
+  override kind: CatalogKind = 'types';
 }
-

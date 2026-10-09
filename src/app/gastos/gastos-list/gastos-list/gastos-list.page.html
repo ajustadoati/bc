@@ -11,11 +11,15 @@
 </ion-header>
 
 <ion-content>
-  <ion-list>
+  <p class="ion-padding" *ngIf="loading" role="status">Cargando gastos…</p>
+  <div class="ion-padding" *ngIf="loadError" role="alert"><p>No pudimos cargar los gastos. El registro que hayas guardado se conserva.</p><ion-button (click)="loadExpenses()">Reintentar</ion-button></div>
+  <ion-list *ngIf="!loading && !loadError">
     <ion-item *ngFor="let expense of expenses" (click)="openGastosDetails(expense.id)">
       <ion-label>
-        <h3>{{ expense.description }}</h3>
-        <p>Fecha: {{ expense.expenseDate | date:'dd-MM-yy' }} - {{ expense.amount | number:'1.2-2' }}</p>
+        <h3>{{ expense.description || 'Gasto registrado' }}</h3>
+        <p>{{ formatDate(expense.expenseDate) }}</p>
+        <p *ngIf="expense.amountDl != null">USD {{ expense.amountDl | number:'1.2-2' }}</p>
+        <p *ngIf="expense.amount != null">Bs {{ expense.amount | number:'1.2-2' }}</p>
       </ion-label>
 
       <!-- 
@@ -26,8 +30,8 @@
 
     </ion-item>
   </ion-list>
+  <p class="ion-padding" *ngIf="!loading && !loadError && !expenses.length">Este bus aún no tiene gastos registrados.</p>
   
 </ion-content>
-
 
 

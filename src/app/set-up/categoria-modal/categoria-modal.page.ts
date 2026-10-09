@@ -1,55 +1,8 @@
-import { Component, OnInit ,Input} from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
-import { ModalController } from '@ionic/angular';
-import { IonContent, IonHeader, IonTitle, IonToolbar,IonButton,IonButtons,IonList,IonItem,IonLabel,IonIcon} from '@ionic/angular/standalone';
-import { AddcategoriaModalPage } from '../addcategoria-modal/addcategoria-modal.page'
-import { SubCategoriaModalPage } from '../sub-categoria-modal/sub-categoria-modal.page'
-import { AuthService } from 'src/app/services/auth.service';
+import { Component } from '@angular/core';
+import { CatalogKind } from '../../shared/management.models';
+import { CatalogListBase, CATALOG_LIST_IMPORTS } from '../catalog-list.page';
 
-@Component({
-  selector: 'app-categoria-modal',
-  templateUrl: './categoria-modal.page.html',
-  styleUrls: ['./categoria-modal.page.scss'],
-  standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule,IonButton,IonButtons,IonList,IonItem,IonLabel,IonIcon]
-})
-export class CategoriaModalPage implements OnInit {
-  @Input() categorias: any[] = [];
-
-  constructor(private modalCtrl: ModalController, private router: Router, private authService: AuthService) {}
-
-  ngOnInit() {
-  }
-
-  async addCategoriaModal(){
-    const modalAddCategoria = await this.modalCtrl.create({
-      component: AddcategoriaModalPage
-    })
-
-    await modalAddCategoria.present();
-  }
-
-  async subCategoriaModal(category: any) {
-    console.log("Abriendo modal con categoría:", category);
-  
-    const modalSubCategoria = await this.modalCtrl.create({
-      component: SubCategoriaModalPage,
-      componentProps: { 
-        categoryId: category.id,
-        categoryName: category.name  
-      }
-    });
-  
-    await modalSubCategoria.present();
-  }
-
-  logout(){
-    this.modalCtrl.dismiss();
-    this.authService.logout();
-    this.router.navigate(['/set-up'])
-  }
-
-
+@Component({ selector: 'app-categoria-modal', templateUrl: '../catalog-list.page.html', styleUrls: ['../../shared/management.scss'], standalone: true, imports: CATALOG_LIST_IMPORTS })
+export class CategoriaModalPage extends CatalogListBase {
+  override kind: CatalogKind = 'categories';
 }

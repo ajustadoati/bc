@@ -1,0 +1,17 @@
+.people-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 17px; }
+.person-card { border: 1px solid #e4ebe7; border-radius: 13px; overflow: hidden; padding: 20px 20px 0; min-width: 0; background: #fff; }
+.person-top { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 18px; }
+.avatar { width: 47px; height: 47px; display: grid; place-items: center; font-size: 15px; font-weight: 700; background: #edf3fb; color: #547fa1; border-radius: 14px; }
+.avatar.collector { background: #fff3e1; color: #ad8243; }
+.person-card h3 { font-size: 16px; line-height: 1.5; overflow-wrap: anywhere; }
+.identity { font-size: 11px; color: #667881; margin-top: 5px; overflow-wrap: anywhere; }
+.contact { display: flex; gap: 7px; align-items: center; font-size: 12px; color: #667881; margin: 18px 0; overflow-wrap: anywhere; }
+.contact a { color: #216b59; }
+.contact ion-icon { flex-shrink: 0; font-size: 15px; }
+.person-actions { margin: 0 -20px; border-top: 1px solid #edf0ee; background: #f9fbfa; }
+.person-actions button { width: 100%; display: flex; justify-content: space-between; align-items: center; border: 0; background: transparent; color: #216b59; font-size: 12px; font-weight: 600; padding: 14px 20px; min-height: 44px; }
+.pagination { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding-top: 23px; color: #667881; font-size: 11px; }
+.pagination div { display: flex; align-items: center; gap: 12px; }
+.pagination .secondary { min-height: 36px; font-size: 11px; padding: 8px 12px; }
+@media (max-width: 900px) { .people-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .people-grid { grid-template-columns: 1fr; gap: 12px; } .pagination { flex-direction: column; } }

@@ -1,92 +1,82 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AlertController, IonBackButton, IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonContent, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonTitle, IonToolbar, ModalController } from '@ionic/angular/standalone';
+import { RouterModule } from '@angular/router';
+import { IonContent, IonIcon, ModalController } from '@ionic/angular/standalone';
+import { of, Subject, switchMap, takeUntil, throwError } from 'rxjs';
+import { addIcons } from 'ionicons';
+import { addOutline, arrowBackOutline, busOutline, callOutline, chevronForwardOutline, peopleOutline, personOutline, refreshOutline, walletOutline } from 'ionicons/icons';
 import { AuthService } from '../services/auth.service';
 import { OperadorService } from '../services/operador.service';
+import { User } from '../interfaces/user';
 import { CrearPage } from './crear/crear.page';
 import { OperadoresDetailsPage } from './operadores-details/operadores-details.page';
+import { Operator, operatorInitials, operatorName, roleLabel, visibleOperators } from './operator.models';
+import { phoneHref } from '../shared/management.models';
 
-@Component({
-  selector: 'app-operadores',
-  templateUrl: './operadores.page.html',
-  standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonButtons, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, 
-    IonItem, IonLabel, IonIcon, IonButton, IonList, IonButtons,  IonBackButton]
-})
-export class OperadoresPage implements OnInit {
-
-  operadores = [
-    { id: 1,firstName: 'Richard', lastName: 'Rojas', numberId: '001', mobileNumber: '42121212', type: 'Empresa X', email: "email" },
-    { id: 2,firstName: 'Pablo', lastName: 'Perez', numberId: '002', mobileNumber: 'ABC123', type: 'Empresa X', email: "email" }
-  ];
-
-  user: any;
-
-  constructor(private modalCtrl: ModalController, private operadorService: OperadorService, private authService: AuthService,
-    private alertController: AlertController
-  ) {}
-  ngOnInit(): void {
-     this.user = this.authService.getUser();
-    this.operadorService.getOperadores(this.user.id).subscribe({
-      next: (response) => {
-        this.operadores = response;
-      },
-      error: (err) => {
-        console.error(err);
-      }
+@Component({ selector: 'app-operadores', templateUrl: './operadores.page.html', styleUrls: ['../shared/management.scss', './operadores.page.scss'], standalone: true,
+  imports: [CommonModule, FormsModule, RouterModule, IonContent, IonIcon] })
+export class OperadoresPage implements OnDestroy {
+  operadores: Operator[] = [];
+  user: User | null = null;
+  loading = false;
+  loadError = false;
+  openingModal = false;
+  actionError = '';
+  successMessage = '';
+  search = '';
+  typeFilter = '';
+  page = 1;
+  readonly pageSize = 12;
+  readonly name = operatorName;
+  readonly initials = operatorInitials;
+  readonly role = roleLabel;
+  readonly phone = phoneHref;
+  private readonly destroyed = new Subject<void>();
+  constructor(private modalCtrl: ModalController, private operadorService: OperadorService, private authService: AuthService) {
+    addIcons({ addOutline, arrowBackOutline, busOutline, callOutline, chevronForwardOutline, peopleOutline, personOutline, refreshOutline, walletOutline });
+  }
+  ionViewWillEnter(): void { this.loadOperators(); }
+  loadOperators(): void {
+    if (this.loading) return;
+    this.loading = true; this.loadError = false;
+    const cached = this.authService.getUser();
+    const profile = cached ? of(cached) : this.authService.getUserId() ? this.authService.loadUser(this.authService.getUserId()) : throwError(() => new Error('Sesión no disponible'));
+    profile.pipe(switchMap(user => { this.user = user; return this.operadorService.getOperadores(String(user.id)); }), takeUntil(this.destroyed)).subscribe({
+      next: data => { this.operadores = data; this.loading = false; this.page = 1; },
+      error: () => { this.loading = false; this.loadError = true; }
     });
   }
-
-  get operadoresFiltrados() {
-    return this.operadores.filter(op => op.type !== 'ADMIN');
+  get team(): Operator[] { return visibleOperators(this.operadores); }
+  get filtered(): Operator[] { return visibleOperators(this.operadores, this.search, this.typeFilter); }
+  get displayed(): Operator[] { return this.filtered.slice((this.page - 1) * this.pageSize, this.page * this.pageSize); }
+  get pages(): number { return Math.max(1, Math.ceil(this.filtered.length / this.pageSize)); }
+  get driverCount(): number { return this.team.filter(item => item.type === 'CONDUCTOR').length; }
+  get collectorCount(): number { return this.team.filter(item => item.type === 'COLECTOR').length; }
+  filtersChanged(): void { this.page = 1; }
+  clearFilters(): void { this.search = ''; this.typeFilter = ''; this.page = 1; }
+  trackOperator(_index: number, item: Operator): number { return item.id; }
+  async abrirModalAgregar(): Promise<void> {
+    if (this.openingModal || this.loading || !this.user) return;
+    this.openingModal = true; this.actionError = ''; this.successMessage = '';
+    try {
+      const modal = await this.modalCtrl.create({ component: CrearPage, cssClass: 'operator-editor-modal' });
+      await modal.present();
+      const { data } = await modal.onDidDismiss();
+      if (data?.saved) { this.loadOperators(); this.successMessage = 'Operador registrado. Ya puedes consultar su ficha.'; }
+    } catch { this.actionError = 'No pudimos abrir el registro. Vuelve a intentarlo.'; }
+    finally { this.openingModal = false; }
   }
-
-  async abrirModalDetalle(vehiculo: any) {
-    const modal = await this.modalCtrl.create({
-      component: CrearPage,
-      componentProps: { vehiculo }
-    });
-    await modal.present();
+  async openOperadoresDetails(operador: Operator): Promise<void> {
+    if (this.openingModal) return;
+    this.openingModal = true; this.actionError = ''; this.successMessage = '';
+    try {
+      const modal = await this.modalCtrl.create({ component: OperadoresDetailsPage, cssClass: 'operator-detail-modal', componentProps: { operador } });
+      await modal.present();
+      const { data } = await modal.onDidDismiss();
+      if (data?.deleted) { this.operadores = this.operadores.filter(item => item.id !== data.deleted); this.page = Math.min(this.page, this.pages); this.successMessage = 'Operador eliminado.'; }
+    } catch { this.actionError = 'No pudimos abrir la ficha. Vuelve a intentarlo.'; }
+    finally { this.openingModal = false; }
   }
-
-  async abrirModalAgregar() {
-    const modal = await this.modalCtrl.create({
-      component: CrearPage
-    });
-    await modal.present();
-  }
-
-  async eliminarOperador(operador: any) {
-    const alert = await this.alertController.create({
-      header: 'Eliminar Operador',
-      message: `¿Estás seguro de que deseas eliminar a ${operador.firstName} ${operador.lastName}?`,
-      buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel',
-        },
-        {
-          text: 'Eliminar',
-          handler: () => {
-            this.operadorService.eliminarOperador(operador.id).subscribe(() => {
-              this.operadores= this.operadores.filter(o => o.id !== operador.id);
-            });
-          },
-        },
-      ],
-    });
-
-    await alert.present();
-  }
-
-  async openOperadoresDetails(operador: any){
-    const modalOperadorDetails = await this.modalCtrl.create({
-      component: OperadoresDetailsPage,
-      componentProps: { operador }
-    });
-
-    await modalOperadorDetails.present();
-  }
-
+  ngOnDestroy(): void { this.destroyed.next(); this.destroyed.complete(); }
 }

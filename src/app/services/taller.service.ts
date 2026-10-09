@@ -22,7 +22,7 @@ export class TallerService {
       );
   }
     
-  createWorkshop(data: { name: string; phone: string }): Observable<any> {
+  createWorkshop(data: { name: string; mobileNumber: string; direction?: string }): Observable<any> {
     console.log("Enviando nuevo taller:", data);
     return this.http.post<any>(this.apiUrl, data);
   }

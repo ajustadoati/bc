@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { EMPTY, Observable, expand, reduce } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -13,13 +13,21 @@ export class OperadorService {
   constructor(private http: HttpClient) { }
 
   getOperadores(userId: string): Observable<any[]> {
-    console.log("Get operadores", userId);
-    return this.http.get<any[]>(this.apiUrl +'/'+ userId + '/company')
-      .pipe(
-        map((data: any) => {
-          return data._embedded.collection;
-        })
-      );
+    // The backend's HAL next link targets the global users endpoint. Keep
+    // every page on this company's endpoint and use its page metadata instead.
+    const loadPage = (page: number) => this.http.get<any>(`${this.apiUrl}/${userId}/company`, {
+      params: { page: String(page), size: '100', sort: 'userId,asc' }
+    });
+    return loadPage(0).pipe(
+      expand(data => {
+        const page = data.page;
+        return page && page.number + 1 < page.totalPages ? loadPage(page.number + 1) : EMPTY;
+      }),
+      reduce((all: any[], data: any) => {
+        const items = Object.values(data._embedded || {}).find(Array.isArray) as any[] | undefined;
+        return [...all, ...(items || [])];
+      }, [])
+    );
   }
 
 

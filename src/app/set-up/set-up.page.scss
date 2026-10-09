@@ -1,0 +1,24 @@
+.settings-layout { display: grid; grid-template-columns: 1fr 290px; gap: 22px; margin-top: 26px; align-items: start; }
+.settings-sections { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.setting-card { background: #fff; border: 1px solid #e4ebe7; border-radius: 15px; padding: 24px 24px 0; overflow: hidden; min-width: 0; }
+.setting-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 22px; }
+.setting-top .section-icon { width: 46px; height: 46px; font-size: 25px; }
+.setting-card h2 { font-size: 20px; line-height: 1.4; letter-spacing: -.4px; }
+.setting-card > p { font-size: 13px; line-height: 1.8; color: #667881; margin-top: 12px; min-height: 92px; }
+.setting-count { display: flex; align-items: baseline; gap: 9px; margin: 22px 0; }
+.setting-count strong { font-size: 27px; }
+.setting-count span { font-size: 11px; color: #667881; }
+.setting-action { width: calc(100% + 48px); margin: 0 -24px; display: flex; align-items: center; justify-content: space-between; background: #f9fbfa; border: 0; border-top: 1px solid #edf0ee; padding: 17px 24px; font-size: 12px; font-weight: 650; color: #216b59; min-height: 50px; }
+.setting-card .notice p { font-size: 12px; }
+.setting-card .notice button { margin-top: 10px; font-size: 11px; }
+.settings-guide { border: 1px solid #e4ebe7; border-radius: 15px; background: #f0f5f1; padding: 24px; }
+.settings-guide h2 { font-size: 16px; margin-top: 18px; }
+.settings-guide p { font-size: 12px; line-height: 1.8; color: #657b6e; margin-top: 12px; }
+.guide-example { padding: 18px; border-radius: 11px; background: #fff; border: 1px solid #e2eae4; margin-top: 22px; }
+.guide-example > span { font-size: 10px; color: #667881; }
+.guide-example strong { display: block; font-size: 13px; margin: 8px 0; }
+.guide-example > ion-icon { transform: rotate(90deg); color: #92a99b; margin: 2px 0 8px; }
+.guide-example div { display: flex; flex-wrap: wrap; gap: 6px; }
+.guide-example div span { background: #eaf3ed; color: #216b59; border-radius: 5px; padding: 6px 8px; font-size: 10px; }
+@media (max-width: 1000px) { .settings-layout { grid-template-columns: 1fr; } .settings-guide { max-width: none; } }
+@media (max-width: 640px) { .settings-sections { grid-template-columns: 1fr; } .setting-card > p { min-height: 0; } .setting-card { padding: 22px 22px 0; } .setting-action { margin: 0 -22px; width: calc(100% + 44px); padding: 17px 22px; } }

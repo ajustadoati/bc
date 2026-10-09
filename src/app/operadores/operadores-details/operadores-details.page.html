@@ -1,46 +1,7 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Detalles del Operador </ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="cerrarModal()">
-        <ion-icon slot="end" name="log-out-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content>
-  <ion-card *ngIf="operador">
-    <ion-card-header>
-      <ion-card-title>Información</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-grid>
-        <ion-row>
-          <ion-col size="6">
-            <p> <strong>Nombre:</strong> {{ operador.firstName }} </p>
-          </ion-col>
-          <ion-col>
-            <p> <strong>Apellido:</strong>  {{operador.lastName }} </p>
-          </ion-col>
-        </ion-row>
-        <ion-row>
-          <ion-col size="6">
-            <p><strong>Tipo:</strong> {{ operador.type }}</p>
-          </ion-col>
-          <ion-col size="6">
-            <p><strong>Teléfono:</strong> {{ operador.mobileNumber || 'No especificado'}}</p>
-          </ion-col>
-          <ion-col size="6">
-            <p><strong>Cédula:</strong> {{ operador.numberId || 'No especificado'}}</p>
-          </ion-col>
-        </ion-row>
-        <ion-row>
-          <ion-col size="12">
-            <p><strong>Email:</strong> {{ operador.email || 'No especificado' }} </p>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
-    </ion-card-content>
-  </ion-card>
-</ion-content>
+<ion-header class="ion-no-border"><div class="modal-heading"><div><span class="eyebrow">CONOCE A TU EQUIPO</span><h1>Ficha del operador</h1></div><button class="icon-button" aria-label="Cerrar ficha del operador" [disabled]="busy" (click)="cerrarModal()"><ion-icon name="close-outline" aria-hidden="true"></ion-icon></button></div></ion-header>
+<ion-content><main class="modal-body" *ngIf="operador as item; else noOperator">
+  <section class="profile"><span class="profile-avatar" aria-hidden="true">{{ initials(item) }}</span><div><span class="badge" [class.blue]="item.type === 'CONDUCTOR'">{{ role(item.type) }}</span><h2>{{ name(item) }}</h2><p>Cédula · {{ item.numberId || 'No registrada' }}</p></div></section>
+  <section class="panel"><div class="panel-title"><span class="section-icon"><ion-icon name="id-card-outline" aria-hidden="true"></ion-icon></span><div><h2>Datos personales</h2><p>La información registrada en tu equipo</p></div></div><dl class="data-grid"><div><dt>Nombres</dt><dd>{{ item.firstName || 'No registrados' }}</dd></div><div><dt>Apellidos</dt><dd>{{ item.lastName || 'No registrados' }}</dd></div><div><dt>Cédula</dt><dd>{{ item.numberId || 'No registrada' }}</dd></div><div><dt>Tipo de operador</dt><dd>{{ role(item.type) }}</dd></div></dl></section>
+  <section class="panel"><div class="panel-title"><span class="section-icon blue"><ion-icon name="call-outline" aria-hidden="true"></ion-icon></span><div><h2>Contacto directo</h2><p>Abre el teléfono o correo desde su ficha</p></div></div><dl class="data-grid"><div><dt>Teléfono</dt><dd><a *ngIf="phone(item.mobileNumber) as href; else phoneText" [href]="href">{{ item.mobileNumber }}</a><ng-template #phoneText>{{ item.mobileNumber || 'Sin teléfono registrado' }}</ng-template></dd></div><div><dt>Correo electrónico</dt><dd><a *ngIf="email(item.email) as href; else emailText" [href]="href">{{ item.email }}</a><ng-template #emailText>{{ item.email || 'Sin correo registrado' }}</ng-template></dd></div></dl></section>
+</main><ng-template #noOperator><div class="state"><ion-icon name="person-outline" aria-hidden="true"></ion-icon><h2>Selecciona un operador</h2><p>Abre una ficha desde el directorio del equipo.</p></div></ng-template></ion-content>
+<ion-footer class="ion-no-border"><div class="modal-footer"><p class="notice error" role="alert" *ngIf="deleteError">{{ deleteError }}</p><div class="footer-actions"><button class="danger" *ngIf="operador && operador.type !== 'ADMIN'" [disabled]="busy" (click)="eliminar()"><ion-icon name="trash-outline" aria-hidden="true"></ion-icon>{{ isDeleting ? 'Eliminando…' : 'Eliminar operador' }}</button><button class="primary" [disabled]="busy" (click)="cerrarModal()">Volver al equipo</button></div></div></ion-footer>

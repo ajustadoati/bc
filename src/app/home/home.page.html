@@ -82,7 +82,7 @@
 <button class="primary-button" (click)="registerIncome()" [disabled]="!user || openingIncome">
 <ion-icon name="add-outline" aria-hidden="true">
 </ion-icon>{{ openingIncome ? 'Abriendo…' : 'Registrar ingreso' }}</button>
-<a class="secondary-button" routerLink="/gastos">Registrar gasto<ion-icon name="arrow-forward-outline" aria-hidden="true">
+<a class="secondary-button" routerLink="/gastos" [queryParams]="{ accion: 'registrar' }">Registrar gasto<ion-icon name="arrow-forward-outline" aria-hidden="true">
 </ion-icon>
 </a>
 </div>

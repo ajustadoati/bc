@@ -1,0 +1,23 @@
+.expense-intro { display: flex; align-items: center; justify-content: space-between; gap: 28px; padding: 28px; margin-bottom: 26px; border: 1px solid #eeddbd; border-radius: 15px; background: #fff5e5; }
+.expense-intro > div { max-width: 560px; min-width: 0; }
+.expense-intro h2 { font-size: 24px; letter-spacing: -.6px; }
+.expense-intro p { font-size: 13px; color: #82602f; line-height: 1.7; margin-top: 12px; }
+.expense-intro img { width: 230px; height: auto; }
+.steps { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 20px; color: #82602f; font-size: 12px; }
+.steps span { display: inline-flex; align-items: center; gap: 8px; }
+.steps b { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: #fff; }
+.bus-search { margin-bottom: 24px; max-width: 520px; }
+.bus-search > div { position: relative; }
+.bus-search ion-icon { position: absolute; left: 13px; top: 13px; color: #667881; font-size: 18px; }
+.bus-search input { padding-left: 40px; }
+.expense-buses { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.expense-bus { border: 1px solid #e4ebe7; border-radius: 12px; padding: 20px; min-width: 0; }
+.bus-heading { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 20px; }
+.bus-heading .badge { max-width: 75%; white-space: normal; overflow-wrap: anywhere; }
+.expense-bus h3 { font-size: 22px; overflow-wrap: anywhere; }
+.bus-model, .bus-company { font-size: 12px; color: #667881; line-height: 1.6; margin-top: 7px; overflow-wrap: anywhere; }
+.bus-company { font-size: 11px; }
+.bus-actions { display: grid; gap: 12px; margin-top: 22px; }
+.history-link { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12px; color: #216b59; min-height: 44px; }
+@media (max-width: 1000px) { .expense-buses { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .expense-intro { padding: 14px 18px; margin-bottom: 20px; } .expense-intro img, .expense-intro .eyebrow, .expense-intro h2, .expense-intro p { display: none; } .steps { margin-top: 0; } .expense-buses { grid-template-columns: 1fr; } }

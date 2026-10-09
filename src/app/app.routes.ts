@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { expenseFormCanDeactivate } from './gastos/expense-form.guard';
 import { AuthGuard } from './guards/auth.guard';
 import { HomePage } from './home/home.page';
 import { LoginPage } from './login/login.page';
@@ -38,7 +39,8 @@ export const routes: Routes = [
   {
     path: 'vehiculos/:vehicleId/gastos/nuevo',
     loadComponent: () => import('./gastos/gastos-crear/crear/crear.page').then(m => m.CrearPage),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard],
+    canDeactivate: [expenseFormCanDeactivate]
   },
   {
     path: 'operadores',

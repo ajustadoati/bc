@@ -1,36 +1,22 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/home"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Operadores</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="abrirModalAgregar()">
-        <ion-icon name="add-circle"></ion-icon> Agregar
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Operadores</ion-title>
-    </ion-toolbar>
-  </ion-header>
-
-  <!-- Listado de vehículos -->
-  <ion-list>
-    <ion-item *ngFor="let operador of operadoresFiltrados" (click)="openOperadoresDetails(operador)">
-      <ion-label>
-        <h2>Operador: {{ operador.firstName }} {{ operador.lastName }}</h2>
-        <p>Cédula: {{ operador.numberId }}</p>
-        <p>Tipo: {{ operador.type }}</p>
-      </ion-label>
-      <ion-button color="danger" (click)="eliminarOperador(operador); $event.stopPropagation()" >
-        <ion-icon name="trash"></ion-icon> Eliminar
-      </ion-button>
-    </ion-item>
-    
-  </ion-list>
+<ion-content>
+  <header class="topbar"><a routerLink="/home" class="brand"><ion-icon name="bus-outline" aria-hidden="true"></ion-icon>Bus<span>Control</span></a><a routerLink="/home" class="back-link"><ion-icon name="arrow-back-outline" aria-hidden="true"></ion-icon>Mi escritorio</a></header>
+  <main class="workspace">
+    <div class="page-heading"><div><p class="eyebrow">LAS PERSONAS QUE MUEVEN TU NEGOCIO</p><h1>Operadores</h1><p>Tu equipo y sus datos, siempre a mano.</p></div><button class="primary" (click)="abrirModalAgregar()" [disabled]="loading || !user || openingModal"><ion-icon name="add-outline" aria-hidden="true"></ion-icon>Registrar operador</button></div>
+    <section class="hero" aria-label="Tu equipo"><div><span class="eyebrow">CADA PERSONA CUENTA</span><h2>Un buen equipo.<br>Un mejor camino.</h2><p>Encuentra a tus conductores y colectores,<br>consulta su ficha y mantente en contacto.</p></div><div class="hero-art" aria-hidden="true"><ion-icon name="person-outline"></ion-icon><ion-icon name="people-outline"></ion-icon><ion-icon name="wallet-outline"></ion-icon></div></section>
+    <section class="stats" aria-label="Resumen del equipo" [attr.aria-busy]="loading"><div class="stat"><span class="section-icon"><ion-icon name="people-outline" aria-hidden="true"></ion-icon></span><div><p>Equipo registrado</p><strong>{{ loading || loadError ? '—' : team.length }}</strong></div></div><div class="stat"><span class="section-icon blue"><ion-icon name="bus-outline" aria-hidden="true"></ion-icon></span><div><p>Conductores</p><strong>{{ loading || loadError ? '—' : driverCount }}</strong></div></div><div class="stat"><span class="section-icon orange"><ion-icon name="wallet-outline" aria-hidden="true"></ion-icon></span><div><p>Colectores</p><strong>{{ loading || loadError ? '—' : collectorCount }}</strong></div></div></section>
+    <section class="directory" aria-labelledby="team-title">
+      <div class="section-heading"><div><h2 id="team-title">Directorio del equipo</h2><p>Busca por nombre, cédula, teléfono o correo.</p></div><span class="badge" *ngIf="!loading && !loadError">{{ filtered.length }} {{ filtered.length === 1 ? 'persona' : 'personas' }}</span></div>
+      <div class="filters"><div class="field"><label for="operator-search">Buscar operador</label><input id="operator-search" type="search" [(ngModel)]="search" (ngModelChange)="filtersChanged()" placeholder="Nombre, cédula o contacto…"></div><div class="field"><label for="operator-role">Tipo de operador</label><select id="operator-role" [(ngModel)]="typeFilter" (ngModelChange)="filtersChanged()"><option value="">Todo el equipo</option><option value="CONDUCTOR">Conductores</option><option value="COLECTOR">Colectores</option></select></div></div>
+      <p class="notice error" role="alert" *ngIf="actionError">{{ actionError }}</p><p class="notice success" role="status" *ngIf="successMessage">{{ successMessage }}</p>
+      <div class="state" role="status" *ngIf="loading"><ion-icon name="refresh-outline" aria-hidden="true"></ion-icon><h3>Cargando tu equipo…</h3><p>Estamos preparando las fichas de tus operadores.</p></div>
+      <div class="state" role="alert" *ngIf="!loading && loadError"><ion-icon name="people-outline" aria-hidden="true"></ion-icon><h3>No pudimos cargar tu equipo</h3><p>Comprueba la conexión y vuelve a intentarlo.</p><button class="primary" (click)="loadOperators()">Reintentar</button></div>
+      <ng-container *ngIf="!loading && !loadError">
+        <div class="people-grid" *ngIf="displayed.length"><article class="person-card" *ngFor="let item of displayed; trackBy: trackOperator"><div class="person-top"><span class="avatar" [class.collector]="item.type === 'COLECTOR'" aria-hidden="true">{{ initials(item) }}</span><span class="badge" [class.blue]="item.type === 'CONDUCTOR'">{{ role(item.type) }}</span></div><h3>{{ name(item) }}</h3><p class="identity">Cédula · {{ item.numberId || 'No registrada' }}</p><p class="contact"><ion-icon name="call-outline" aria-hidden="true"></ion-icon><a *ngIf="phone(item.mobileNumber) as href; else noPhone" [href]="href">{{ item.mobileNumber }}</a><ng-template #noPhone>{{ item.mobileNumber || 'Sin teléfono registrado' }}</ng-template></p><div class="person-actions"><button (click)="openOperadoresDetails(item)" [disabled]="openingModal" [attr.aria-label]="'Ver ficha de ' + name(item)">Ver ficha<ion-icon name="chevron-forward-outline" aria-hidden="true"></ion-icon></button></div></article></div>
+        <div class="state" *ngIf="!team.length"><ion-icon name="people-outline" aria-hidden="true"></ion-icon><h3>Tu equipo empieza aquí</h3><p>Registra tu primer conductor o colector para tener sus datos a mano.</p><button class="primary" (click)="abrirModalAgregar()" [disabled]="openingModal || !user">Registrar operador</button></div>
+        <div class="state" *ngIf="team.length && !filtered.length"><ion-icon name="person-outline" aria-hidden="true"></ion-icon><h3>No encontramos coincidencias</h3><p>Prueba con otro nombre o cambia el tipo de operador.</p><button class="secondary" (click)="clearFilters()">Limpiar filtros</button></div>
+        <div class="pagination" *ngIf="filtered.length"><span>Ordenados por nombre · {{ filtered.length }} {{ filtered.length === 1 ? 'registro' : 'registros' }}</span><div><button class="secondary" (click)="page = page - 1" [disabled]="page === 1">Anterior</button><span>{{ page }} de {{ pages }}</span><button class="secondary" (click)="page = page + 1" [disabled]="page === pages">Siguiente</button></div></div>
+      </ng-container>
+    </section>
+    <footer class="page-footer"><span>Tu equipo, más cerca.</span><span>Bus Control · Cada bus cuenta.</span></footer>
+  </main>
 </ion-content>
